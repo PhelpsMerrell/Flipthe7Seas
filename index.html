@@ -909,15 +909,11 @@
             }
 
             drawCard() {
-                console.log('drawCard method called');
-                
                 // Get active round state
                 const activeRoundData = this.getActiveRoundData();
-                console.log('activeRoundData:', activeRoundData);
                 
                 // Check if active round is frozen, busted, or at 7-card limit first
                 if (activeRoundData.isFrozen || activeRoundData.isBusted || activeRoundData.round.length >= 7) {
-                    console.log('Cannot draw: round state prevents it');
                     return null;
                 }
 
@@ -1206,8 +1202,27 @@
             }
 
             handleFlipThree(flipThreeCard) {
-                // First, move the Flip Three card to drawn pile
-                this.drawnCards.push(flipThreeCard);
+                // Add flip three card to power cards area
+                this.powerCards.push(flipThreeCard);
+            }
+
+            activateFlipThree(powerIndex) {
+                if (powerIndex >= this.powerCards.length || this.isFlipThreeActive) {
+                    return false;
+                }
+
+                const powerCard = this.powerCards[powerIndex];
+                
+                // Only flip three cards can activate this
+                if (powerCard.type !== 'action' || powerCard.value !== 'flip_three') {
+                    return false;
+                }
+
+                this.saveState();
+
+                // Remove the flip three card from power cards and move to drawn pile
+                const usedFlipThree = this.powerCards.splice(powerIndex, 1)[0];
+                this.drawnCards.push(usedFlipThree);
                 
                 // Draw 3 additional cards if possible
                 const cardsToShow = [];
@@ -1232,9 +1247,11 @@
                 
                 if (cardsToShow.length > 0) {
                     this.showFlipThreeSelection(cardsToShow);
+                    return true;
                 } else {
                     // No cards available, just continue
                     alert('No more cards available for Flip Three!');
+                    return false;
                 }
             }
 
@@ -1302,17 +1319,18 @@
                 
                 const selectedCard = this.flipThreeCards[this.selectedFlipThreeCard];
                 const unselectedCards = this.flipThreeCards.filter((_, index) => index !== this.selectedFlipThreeCard);
+                const activeRoundData = this.getActiveRoundData();
                 
                 // Handle the selected card based on its type
                 if (selectedCard.type === 'action') {
                     if (selectedCard.value === 'flip_three') {
-                        // Another flip three - goes to drawn pile
-                        this.drawnCards.push(selectedCard);
+                        // Another flip three - goes to power cards area
+                        this.powerCards.push(selectedCard);
                     } else if (selectedCard.value === 'freeze') {
-                        // Freeze card - add to round and set frozen state
-                        if (this.currentRound.length < 7) {
-                            this.currentRound.push(selectedCard);
-                            this.isFrozen = true;
+                        // Freeze card - add to active round and set frozen state
+                        if (activeRoundData.round.length < 7) {
+                            activeRoundData.round.push(selectedCard);
+                            this.setActiveRoundData('isFrozen', true);
                         } else {
                             this.drawnCards.push(selectedCard);
                         }
@@ -1320,9 +1338,9 @@
                         // Second chance - goes to power cards area
                         this.powerCards.push(selectedCard);
                     } else {
-                        // Other action cards - add to current round if space
-                        if (this.currentRound.length < 7) {
-                            this.currentRound.push(selectedCard);
+                        // Other action cards - add to active round if space
+                        if (activeRoundData.round.length < 7) {
+                            activeRoundData.round.push(selectedCard);
                         } else {
                             this.drawnCards.push(selectedCard);
                         }
@@ -1331,12 +1349,14 @@
                     // Modifier cards go to power cards area
                     this.powerCards.push(selectedCard);
                 } else {
-                    // Number cards - add to current round if space
-                    if (this.currentRound.length < 7) {
-                        this.currentRound.push(selectedCard);
+                    // Number cards - add to active round if space
+                    if (activeRoundData.round.length < 7) {
+                        activeRoundData.round.push(selectedCard);
                         // Check for bust after adding the card
                         if (selectedCard.type === 'number') {
-                            this.checkForBust(selectedCard);
+                            this.checkForBust(selectedCard, this.activeRound);
+                            // Check for Flip 7 achievement after adding number card
+                            this.checkForFlipSeven(this.activeRound);
                         }
                     } else {
                         this.drawnCards.push(selectedCard);
@@ -1617,6 +1637,17 @@
                             } else {
                                 cardElement.title = 'Can only use when busted';
                             }
+                        } else if (card.type === 'action' && card.value === 'flip_three') {
+                            // Flip Three cards - clickable to activate
+                            if (!this.isFlipThreeActive) {
+                                cardElement.classList.add('power-card-selectable');
+                                cardElement.title = 'Click to draw 3 cards and choose 1';
+                                cardElement.addEventListener('click', () => {
+                                    this.activateFlipThree(index);
+                                });
+                            } else {
+                                cardElement.title = 'Flip Three already active';
+                            }
                         } else if (card.type === 'modifier') {
                             if (card.value === 'x2') {
                                 // X2 cards - clickable to start parallel round or boost cards
@@ -1784,13 +1815,6 @@
                 const hasAvailableCards = this.deck.length > 0 || this.drawnCards.length > 0;
                 const activeRoundData = this.getActiveRoundData();
                 const cannotDraw = flipThreeActive || activeRoundData.isFrozen || activeRoundData.isBusted || activeRoundData.round.length >= 7 || !hasAvailableCards;
-                
-                console.log('Button state check:', {
-                    flipThreeActive,
-                    hasAvailableCards,
-                    activeRoundData,
-                    cannotDraw
-                });
                 
                 document.getElementById('drawCard').disabled = cannotDraw;
                 
