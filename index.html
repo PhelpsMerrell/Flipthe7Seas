@@ -140,13 +140,13 @@
         }
 
         .second-chance-area {
-            background: rgba(255,215,0,0.1);
+            background: rgba(138,43,226,0.1);
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 30px;
             backdrop-filter: blur(10px);
             min-height: 120px;
-            border: 2px solid rgba(255,215,0,0.3);
+            border: 2px solid rgba(138,43,226,0.3);
         }
 
         .second-chance-title {
@@ -154,7 +154,7 @@
             margin-bottom: 15px;
             text-align: center;
             font-weight: bold;
-            color: #FFD700;
+            color: #BA68C8;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
 
@@ -183,8 +183,49 @@
         }
 
         @keyframes glow {
-            0%, 100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+            0%, 100% { box-shadow: 0 0 5px rgba(138, 43, 226, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(138, 43, 226, 0.8); }
+        }
+
+        .card-indicator {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .success-indicator {
+            background: linear-gradient(145deg, #4CAF50, #388E3C);
+        }
+
+        .failure-indicator {
+            background: linear-gradient(145deg, #F44336, #D32F2F);
+        }
+
+        .card-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .power-card-selectable {
+            cursor: pointer;
+            animation: powerGlow 2s infinite;
+        }
+
+        @keyframes powerGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(138, 43, 226, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(138, 43, 226, 0.8); }
         }
 
         .round-title {
@@ -567,9 +608,9 @@
         </div>
 
         <div class="second-chance-area">
-            <div class="second-chance-title">Second Chance Cards</div>
+            <div class="second-chance-title">Power Cards</div>
             <div class="second-chance-cards" id="secondChanceCards">
-                <div style="color: rgba(255,255,255,0.5); font-style: italic;">No Second Chance cards available</div>
+                <div style="color: rgba(255,255,255,0.5); font-style: italic;">No Power cards available</div>
             </div>
         </div>
 
@@ -634,13 +675,14 @@
                 this.initializeDeck();
                 this.drawnCards = [];
                 this.currentRound = [];
-                this.secondChanceCards = []; // Cards sitting outside round area
+                this.powerCards = []; // Renamed from secondChanceCards
                 this.history = [];
                 this.flipThreeCards = [];
                 this.selectedFlipThreeCard = null;
                 this.isFlipThreeActive = false;
                 this.isFrozen = false;
                 this.isBusted = false;
+                this.selectedCardForBoost = null; // For power card application
                 this.initializeEventListeners();
                 this.updateDisplay();
             }
@@ -686,7 +728,7 @@
                     deck: [...this.deck],
                     drawnCards: [...this.drawnCards],
                     currentRound: [...this.currentRound],
-                    secondChanceCards: [...this.secondChanceCards],
+                    powerCards: [...this.powerCards],
                     isFrozen: this.isFrozen,
                     isBusted: this.isBusted
                 });
@@ -721,8 +763,11 @@
                         // Other action cards just go to current round
                         this.currentRound.push(card);
                     }
+                } else if (card.type === 'modifier') {
+                    // Modifier cards go to power cards area
+                    this.handlePowerCard(card);
                 } else {
-                    // For number and modifier cards, check for bust
+                    // For number cards, check for bust
                     this.currentRound.push(card);
                     
                     // Check for bust after adding the card
@@ -736,12 +781,61 @@
             }
 
             handleSecondChance(secondChanceCard) {
-                // Add second chance card to separate area
-                this.secondChanceCards.push(secondChanceCard);
+                // Add second chance card to power cards area
+                this.powerCards.push(secondChanceCard);
+            }
+
+            handlePowerCard(powerCard) {
+                // Add modifier/power card to power cards area
+                this.powerCards.push(powerCard);
+            }
+
+            applyPowerCard(powerIndex, targetCardIndex) {
+                if (powerIndex >= this.powerCards.length || targetCardIndex >= this.currentRound.length) {
+                    return false;
+                }
+
+                const powerCard = this.powerCards[powerIndex];
+                const targetCard = this.currentRound[targetCardIndex];
+
+                // Only apply to number cards
+                if (targetCard.type !== 'number') {
+                    return false;
+                }
+
+                this.saveState();
+
+                // Apply the power card effect
+                if (powerCard.value === 'x2') {
+                    targetCard.boostedValue = targetCard.value * 2;
+                } else if (typeof powerCard.value === 'number') {
+                    targetCard.boostedValue = targetCard.value + powerCard.value;
+                }
+
+                // Mark card as boosted
+                targetCard.isBoosted = true;
+
+                // Remove the power card and move to drawn pile
+                const usedPowerCard = this.powerCards.splice(powerIndex, 1)[0];
+                this.drawnCards.push(usedPowerCard);
+
+                this.updateDisplay();
+                return true;
+            }
+
+            selectPowerCardForBoosting(powerIndex) {
+                this.selectedCardForBoost = powerIndex;
+                this.updateDisplay();
             }
 
             useSecondChance(secondChanceIndex) {
-                if (!this.isBusted || secondChanceIndex >= this.secondChanceCards.length) {
+                if (!this.isBusted || secondChanceIndex >= this.powerCards.length) {
+                    return false;
+                }
+
+                const powerCard = this.powerCards[secondChanceIndex];
+                // Only second chance cards can remove bust
+                if (powerCard.type !== 'action' || powerCard.value !== 'second_chance') {
                     return false;
                 }
 
@@ -749,7 +843,7 @@
                 this.saveState();
 
                 // Remove the second chance card and move it to drawn pile
-                const usedSecondChance = this.secondChanceCards.splice(secondChanceIndex, 1)[0];
+                const usedSecondChance = this.powerCards.splice(secondChanceIndex, 1)[0];
                 this.drawnCards.push(usedSecondChance);
 
                 // Find and remove the bust-causing duplicate card
@@ -948,9 +1042,9 @@
                 
                 this.saveState();
                 this.drawnCards.push(...this.currentRound);
-                this.drawnCards.push(...this.secondChanceCards); // Move second chance cards to drawn pile
+                this.drawnCards.push(...this.powerCards); // Move power cards to drawn pile
                 this.currentRound = [];
-                this.secondChanceCards = [];
+                this.powerCards = [];
                 this.isFrozen = false; // Unfreeze when ending round
                 this.isBusted = false; // Unbust when ending round
                 this.updateDisplay();
@@ -963,7 +1057,7 @@
                 this.deck = previousState.deck;
                 this.drawnCards = previousState.drawnCards;
                 this.currentRound = previousState.currentRound;
-                this.secondChanceCards = previousState.secondChanceCards || [];
+                this.powerCards = previousState.powerCards || [];
                 this.isFrozen = previousState.isFrozen !== undefined ? previousState.isFrozen : false;
                 this.isBusted = previousState.isBusted !== undefined ? previousState.isBusted : false;
                 this.updateDisplay();
@@ -979,10 +1073,10 @@
             shuffleAllCards() {
                 if (this.isFlipThreeActive) return;
                 this.saveState();
-                this.deck.push(...this.drawnCards, ...this.currentRound, ...this.secondChanceCards);
+                this.deck.push(...this.drawnCards, ...this.currentRound, ...this.powerCards);
                 this.drawnCards = [];
                 this.currentRound = [];
-                this.secondChanceCards = [];
+                this.powerCards = [];
                 this.isFrozen = false; // Unfreeze when shuffling all
                 this.isBusted = false; // Unbust when shuffling all
                 this.shuffleDeck();
@@ -1006,8 +1100,8 @@
             }
 
             createCardElement(card, forRound = false) {
-                const cardDiv = document.createElement('div');
-                cardDiv.style.position = 'relative';
+                const cardWrapper = document.createElement('div');
+                cardWrapper.className = 'card-wrapper';
                 
                 const img = document.createElement('img');
                 img.src = this.getCardImageSrc(card);
@@ -1032,11 +1126,32 @@
                     fallback.style.fontSize = '14px';
                     fallback.style.fontWeight = 'bold';
                     fallback.innerHTML = this.getCardDisplayName(card);
-                    cardDiv.replaceChild(fallback, img);
+                    cardWrapper.replaceChild(fallback, img);
                 };
                 
-                cardDiv.appendChild(img);
-                return cardDiv;
+                cardWrapper.appendChild(img);
+                
+                // Add success/failure indicator for number cards in round
+                if (forRound && card.type === 'number') {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'card-indicator';
+                    
+                    const effectiveValue = card.isBoosted ? card.boostedValue : card.value;
+                    
+                    if (effectiveValue >= 7) {
+                        indicator.classList.add('success-indicator');
+                        indicator.textContent = '✓';
+                        indicator.title = `Success (${effectiveValue})`;
+                    } else {
+                        indicator.classList.add('failure-indicator');
+                        indicator.textContent = '✗';
+                        indicator.title = `Failure (${effectiveValue})`;
+                    }
+                    
+                    cardWrapper.appendChild(indicator);
+                }
+                
+                return cardWrapper;
             }
 
             getCardDisplayName(card) {
@@ -1070,37 +1185,70 @@
                     deckPile.style.opacity = '1';
                 }
 
-                // Update second chance cards display
-                const secondChanceContainer = document.getElementById('secondChanceCards');
-                secondChanceContainer.innerHTML = '';
+                // Update power cards display
+                const powerCardsContainer = document.getElementById('secondChanceCards');
+                powerCardsContainer.innerHTML = '';
                 
-                if (this.secondChanceCards.length === 0) {
+                if (this.powerCards.length === 0) {
                     const placeholder = document.createElement('div');
                     placeholder.style.color = 'rgba(255,255,255,0.5)';
                     placeholder.style.fontStyle = 'italic';
-                    placeholder.textContent = 'No Second Chance cards available';
-                    secondChanceContainer.appendChild(placeholder);
+                    placeholder.textContent = 'No Power cards available';
+                    powerCardsContainer.appendChild(placeholder);
                 } else {
-                    this.secondChanceCards.forEach((card, index) => {
+                    this.powerCards.forEach((card, index) => {
                         const cardElement = this.createCardElement(card, false);
                         cardElement.className = 'second-chance-card';
                         
-                        // Make clickable if busted
-                        if (this.isBusted) {
-                            cardElement.classList.add('clickable');
-                            cardElement.title = 'Click to remove a duplicate card and continue';
-                            cardElement.addEventListener('click', () => {
-                                this.useSecondChance(index);
-                            });
-                        } else {
-                            cardElement.title = 'Can only use when busted';
+                        if (card.type === 'action' && card.value === 'second_chance') {
+                            // Second Chance cards - clickable if busted
+                            if (this.isBusted) {
+                                cardElement.classList.add('clickable');
+                                cardElement.title = 'Click to remove a duplicate card and continue';
+                                cardElement.addEventListener('click', () => {
+                                    this.useSecondChance(index);
+                                });
+                            } else {
+                                cardElement.title = 'Can only use when busted';
+                            }
+                        } else if (card.type === 'modifier') {
+                            // Modifier cards - clickable to boost number cards
+                            const hasNumberCards = this.currentRound.some(c => c.type === 'number');
+                            if (hasNumberCards) {
+                                cardElement.classList.add('power-card-selectable');
+                                cardElement.title = 'Click to boost a number card';
+                                cardElement.addEventListener('click', () => {
+                                    this.selectPowerCardForBoosting(index);
+                                });
+                            } else {
+                                cardElement.title = 'Need number cards in round to boost';
+                            }
                         }
                         
-                        secondChanceContainer.appendChild(cardElement);
+                        powerCardsContainer.appendChild(cardElement);
                     });
                 }
 
-                // Update round title with freeze/bust indicators
+                // Update current round display with click handlers for boosting
+                const roundCardsContainer = document.getElementById('currentRoundCards');
+                roundCardsContainer.innerHTML = '';
+                this.currentRound.forEach((card, index) => {
+                    const cardElement = this.createCardElement(card, true);
+                    
+                    // Make number cards clickable if we have selected a power card
+                    if (this.selectedCardForBoost !== null && card.type === 'number' && !card.isBoosted) {
+                        cardElement.style.cursor = 'pointer';
+                        cardElement.style.animation = 'powerGlow 2s infinite';
+                        cardElement.title = 'Click to apply power card';
+                        cardElement.addEventListener('click', () => {
+                            this.applyPowerCard(this.selectedCardForBoost, index);
+                            this.selectedCardForBoost = null;
+                        });
+                    }
+                    
+                    roundCardsContainer.appendChild(cardElement);
+                });
+
                 const roundTitle = document.getElementById('roundTitle');
                 let titleText = 'Current Round';
                 let titleClass = 'round-title';
@@ -1119,13 +1267,6 @@
                 
                 roundTitle.className = titleClass;
                 roundTitle.innerHTML = titleText + indicators.join('');
-
-                // Update current round display
-                const roundCardsContainer = document.getElementById('currentRoundCards');
-                roundCardsContainer.innerHTML = '';
-                this.currentRound.forEach(card => {
-                    roundCardsContainer.appendChild(this.createCardElement(card, true));
-                });
 
                 // Update button states - disable if flip three is active, frozen, busted, or at card limit
                 const flipThreeActive = this.isFlipThreeActive;
@@ -1175,7 +1316,7 @@
                     deck: this.deck,
                     drawnCards: this.drawnCards,
                     currentRound: this.currentRound,
-                    secondChanceCards: this.secondChanceCards,
+                    powerCards: this.powerCards,
                     history: this.history,
                     isFrozen: this.isFrozen,
                     isBusted: this.isBusted
@@ -1201,7 +1342,7 @@
                     this.deck = gameState.deck;
                     this.drawnCards = gameState.drawnCards;
                     this.currentRound = gameState.currentRound;
-                    this.secondChanceCards = gameState.secondChanceCards || [];
+                    this.powerCards = gameState.powerCards || gameState.secondChanceCards || [];
                     this.history = gameState.history || [];
                     this.isFrozen = gameState.isFrozen || false;
                     this.isBusted = gameState.isBusted || false;
