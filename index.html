@@ -20,15 +20,50 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
+            display: grid;
+            grid-template-columns: 140px 1fr 120px;
+            grid-template-rows: auto auto auto;
+            grid-template-areas: 
+                "header header header"
+                "sidebar content powerbar"
+                "footer footer footer";
+            gap: 15px;
+            min-height: 100vh;
         }
 
         h1 {
+            grid-area: header;
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             color: #fff;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .sidebar {
+            grid-area: sidebar;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .content-area {
+            grid-area: content;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .powerbar {
+            grid-area: powerbar;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-area {
+            grid-area: footer;
         }
 
         .controls {
@@ -84,11 +119,9 @@
 
         .deck-area {
             display: flex;
-            gap: 30px;
-            margin-bottom: 30px;
-            justify-content: center;
-            align-items: flex-start;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
         }
 
         .deck-pile, .drawn-pile {
@@ -96,26 +129,26 @@
         }
 
         .pile-title {
-            font-size: 18px;
-            margin-bottom: 10px;
+            font-size: 14px;
+            margin-bottom: 8px;
             font-weight: bold;
         }
 
         .card-back {
-            width: 120px;
-            height: 180px;
+            width: 80px;
+            height: 120px;
             background: linear-gradient(145deg, #2c3e50, #34495e);
-            border-radius: 12px;
+            border-radius: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 12px;
             font-weight: bold;
             color: white;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             transition: transform 0.3s;
-            border: 3px solid #fff;
+            border: 2px solid #fff;
         }
 
         .card-back:hover {
@@ -123,35 +156,97 @@
         }
 
         .card-image {
-            width: 120px;
-            height: 180px;
-            border-radius: 12px;
-            border: 3px solid #fff;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            width: 80px;
+            height: 120px;
+            border-radius: 8px;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
-        .current-round {
+        .current-round, .parallel-round {
             background: rgba(255,255,255,0.1);
             border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
+            padding: 15px;
+            margin-bottom: 10px;
             backdrop-filter: blur(10px);
-            min-height: 250px;
+            min-height: 80px;
+            transition: all 0.3s ease;
         }
 
         .parallel-round {
             background: rgba(255,140,0,0.1);
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            backdrop-filter: blur(10px);
-            min-height: 250px;
             border: 2px solid rgba(255,140,0,0.3);
             display: none;
         }
 
         .parallel-round.active {
             display: block;
+        }
+
+        .round-collapsed {
+            min-height: 50px;
+        }
+
+        .round-collapsed .round-cards {
+            display: none;
+        }
+
+        .round-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .round-header:hover {
+            opacity: 0.8;
+        }
+
+        .collapse-toggle {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .collapse-toggle.collapsed {
+            transform: rotate(180deg);
+        }
+
+        .round-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .rounds-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .rounds-container .current-round {
+            order: 1;
+        }
+
+        .rounds-container .parallel-round {
+            order: 2;
+        }
+
+        .rounds-container .current-round.inactive {
+            order: 2;
+        }
+
+        .rounds-container .parallel-round.active-round {
+            order: 1;
         }
 
         .round-inactive {
@@ -162,16 +257,14 @@
         .second-chance-area {
             background: rgba(138,43,226,0.1);
             border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
+            padding: 10px;
             backdrop-filter: blur(10px);
-            min-height: 120px;
             border: 2px solid rgba(138,43,226,0.3);
         }
 
         .second-chance-title {
-            font-size: 18px;
-            margin-bottom: 15px;
+            font-size: 14px;
+            margin-bottom: 10px;
             text-align: center;
             font-weight: bold;
             color: #BA68C8;
@@ -180,10 +273,8 @@
 
         .second-chance-cards {
             display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            justify-content: center;
-            min-height: 60px;
+            flex-direction: column;
+            gap: 8px;
             align-items: center;
         }
 
@@ -195,6 +286,15 @@
 
         .second-chance-card:hover {
             transform: scale(1.05);
+        }
+
+        .second-chance-card .card-image,
+        .second-chance-card .card-back {
+            width: 60px;
+            height: 90px;
+            border-radius: 6px;
+            border: 2px solid #fff;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
         }
 
         .second-chance-card.clickable {
@@ -403,23 +503,28 @@
 
         .round-cards {
             display: flex;
-            flex-wrap: nowrap;
-            gap: 15px;
+            flex-wrap: wrap;
+            gap: 8px;
             justify-content: center;
-            min-height: 180px;
+            min-height: 100px;
             align-items: center;
-            overflow-x: auto;
-            padding: 15px;
+            padding: 8px;
         }
 
         .card-image-round {
-            width: 120px;
-            height: 180px;
-            border-radius: 12px;
-            border: 3px solid #fff;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            width: 80px;
+            height: 120px;
+            border-radius: 8px;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             object-fit: cover;
             transition: transform 0.3s;
+        }
+
+        .card-image-round.small {
+            width: 60px;
+            height: 90px;
+            border-radius: 6px;
         }
 
         .card-image-round:hover {
@@ -427,19 +532,26 @@
         }
 
         .card-back-round {
-            width: 120px;
-            height: 180px;
+            width: 80px;
+            height: 120px;
             background: linear-gradient(145deg, #2c3e50, #34495e);
-            border-radius: 12px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 12px;
             font-weight: bold;
             color: white;
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-            border: 3px solid #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border: 2px solid #fff;
             transition: transform 0.3s;
+        }
+
+        .card-back-round.small {
+            width: 60px;
+            height: 90px;
+            border-radius: 6px;
+            font-size: 10px;
         }
 
         .card-back-round:hover {
@@ -717,58 +829,74 @@
     <div class="container">
         <h1>Card Deck Application</h1>
 
-        <div class="controls">
-            <button id="drawCard">Draw Card</button>
-            <button id="endRound" disabled>End Round</button>
-            <button id="undoAction" disabled>Undo</button>
-            <button id="shuffleRemaining">Shuffle Remaining</button>
-            <button id="shuffleAll" class="danger-btn">Shuffle All Back</button>
-        </div>
-
-        <div class="second-chance-area">
-            <div class="second-chance-title">Power Cards</div>
-            <div class="second-chance-cards" id="secondChanceCards">
-                <div style="color: rgba(255,255,255,0.5); font-style: italic;">No Power cards available</div>
-            </div>
-        </div>
-
-        <div class="current-round" id="currentRoundArea">
-            <div class="round-title" id="roundTitle">Current Round</div>
-            <div class="round-cards" id="currentRoundCards"></div>
-        </div>
-
-        <div class="parallel-round" id="parallelRoundArea">
-            <div class="round-title" id="parallelRoundTitle">Parallel Round (X2)</div>
-            <div class="round-cards" id="parallelRoundCards"></div>
-        </div>
-
-        <div class="deck-area">
-            <div class="deck-pile">
-                <div class="pile-title">Deck</div>
-                <div class="card-back" id="deckPile">
-                    <img src="assets/card_back.png" alt="Card Back" class="card-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                    <div style="display:none;">DECK</div>
+        <div class="sidebar">
+            <div class="deck-area">
+                <div class="deck-pile">
+                    <div class="pile-title">Deck</div>
+                    <div class="card-back" id="deckPile">
+                        <img src="assets/card_back.png" alt="Card Back" class="card-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div style="display:none;">DECK</div>
+                    </div>
+                    <div style="margin-top: 8px; text-align: center; font-size: 12px; font-weight: bold;">
+                        <span id="cardsInDeck">94</span> cards
+                    </div>
                 </div>
-                <div style="margin-top: 10px; text-align: center; font-size: 18px; font-weight: bold;">
-                    <span id="cardsInDeck">94</span> cards
-                </div>
-            </div>
-            <div class="drawn-pile">
-                <div class="pile-title">Drawn Cards</div>
-                <div class="card-back" id="drawnPile" style="cursor: pointer;">
-                    <div>DRAWN<br><span id="drawnCount">0</span></div>
+                <div class="drawn-pile">
+                    <div class="pile-title">Drawn</div>
+                    <div class="card-back" id="drawnPile" style="cursor: pointer;">
+                        <div>DRAWN<br><span id="drawnCount">0</span></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="import-export">
-            <button id="exportGame">Export Game State</button>
-            <button id="importGame">Import Game State</button>
-            <br>
-            <textarea id="gameStateText" placeholder="Paste game state JSON here to import..." class="hidden"></textarea>
-            <br>
-            <button id="confirmImport" class="hidden">Confirm Import</button>
-            <button id="cancelImport" class="hidden">Cancel</button>
+        <div class="content-area">
+            <div class="controls">
+                <button id="drawCard">Draw Card</button>
+                <button id="endRound" disabled>End Round</button>
+                <button id="undoAction" disabled>Undo</button>
+                <button id="shuffleRemaining">Shuffle Remaining</button>
+                <button id="shuffleAll" class="danger-btn">Shuffle All Back</button>
+            </div>
+
+            <div class="rounds-container">
+                <div class="current-round" id="currentRoundArea">
+                    <div class="round-header" id="currentRoundHeader">
+                        <div class="round-title" id="roundTitle">Current Round</div>
+                        <button class="collapse-toggle" id="currentRoundToggle">▼</button>
+                    </div>
+                    <div class="round-cards" id="currentRoundCards"></div>
+                </div>
+
+                <div class="parallel-round" id="parallelRoundArea">
+                    <div class="round-header" id="parallelRoundHeader">
+                        <div class="round-title" id="parallelRoundTitle">Parallel Round (X2)</div>
+                        <button class="collapse-toggle" id="parallelRoundToggle">▼</button>
+                    </div>
+                    <div class="round-cards" id="parallelRoundCards"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="powerbar">
+            <div class="second-chance-area">
+                <div class="second-chance-title">Power Cards</div>
+                <div class="second-chance-cards" id="secondChanceCards">
+                    <div style="color: rgba(255,255,255,0.5); font-style: italic; font-size: 10px;">No Power cards</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-area">
+            <div class="import-export">
+                <button id="exportGame">Export Game State</button>
+                <button id="importGame">Import Game State</button>
+                <br>
+                <textarea id="gameStateText" placeholder="Paste game state JSON here to import..." class="hidden"></textarea>
+                <br>
+                <button id="confirmImport" class="hidden">Confirm Import</button>
+                <button id="cancelImport" class="hidden">Cancel</button>
+            </div>
         </div>
     </div>
 
@@ -825,8 +953,66 @@
                 this.parallelHasFlipSeven = false;
                 this.activeRound = 'main'; // 'main' or 'parallel'
                 
+                // Collapse state
+                this.currentRoundCollapsed = false;
+                this.parallelRoundCollapsed = false;
+                
                 this.initializeEventListeners();
                 this.updateDisplay();
+            }
+
+            toggleCurrentRoundCollapse() {
+                this.currentRoundCollapsed = !this.currentRoundCollapsed;
+                this.updateRoundCollapseState();
+            }
+
+            toggleParallelRoundCollapse() {
+                this.parallelRoundCollapsed = !this.parallelRoundCollapsed;
+                this.updateRoundCollapseState();
+            }
+
+            updateRoundCollapseState() {
+                const currentRoundArea = document.getElementById('currentRoundArea');
+                const parallelRoundArea = document.getElementById('parallelRoundArea');
+                const currentToggle = document.getElementById('currentRoundToggle');
+                const parallelToggle = document.getElementById('parallelRoundToggle');
+
+                // Update current round collapse state
+                if (this.currentRoundCollapsed) {
+                    currentRoundArea.classList.add('round-collapsed');
+                    currentToggle.classList.add('collapsed');
+                } else {
+                    currentRoundArea.classList.remove('round-collapsed');
+                    currentToggle.classList.remove('collapsed');
+                }
+
+                // Update parallel round collapse state
+                if (this.parallelRoundCollapsed) {
+                    parallelRoundArea.classList.add('round-collapsed');
+                    parallelToggle.classList.add('collapsed');
+                } else {
+                    parallelRoundArea.classList.remove('round-collapsed');
+                    parallelToggle.classList.remove('collapsed');
+                }
+            }
+
+            updateRoundOrdering() {
+                const currentRoundArea = document.getElementById('currentRoundArea');
+                const parallelRoundArea = document.getElementById('parallelRoundArea');
+                
+                // Remove existing classes
+                currentRoundArea.classList.remove('active-round', 'inactive');
+                parallelRoundArea.classList.remove('active-round', 'inactive');
+                
+                if (this.isParallelActive) {
+                    if (this.activeRound === 'parallel') {
+                        parallelRoundArea.classList.add('active-round');
+                        currentRoundArea.classList.add('inactive');
+                    } else {
+                        currentRoundArea.classList.add('active-round');
+                        parallelRoundArea.classList.add('inactive');
+                    }
+                }
             }
 
             initializeDeck() {
@@ -1533,6 +1719,10 @@
                 
                 if (forRound) {
                     img.className = 'card-image-round';
+                    // Make cards smaller when both rounds are active
+                    if (this.isParallelActive) {
+                        img.classList.add('small');
+                    }
                 } else {
                     img.className = 'card-image';
                 }
@@ -1542,12 +1732,15 @@
                     const fallback = document.createElement('div');
                     if (forRound) {
                         fallback.className = 'card-back-round';
+                        if (this.isParallelActive) {
+                            fallback.classList.add('small');
+                        }
                     } else {
                         fallback.className = 'card-back';
                         fallback.style.background = 'linear-gradient(145deg, #fff, #f0f0f0)';
                         fallback.style.color = '#333';
                     }
-                    fallback.style.fontSize = '14px';
+                    fallback.style.fontSize = this.isParallelActive && forRound ? '10px' : '12px';
                     fallback.style.fontWeight = 'bold';
                     fallback.innerHTML = this.getCardDisplayName(card);
                     cardWrapper.replaceChild(fallback, img);
@@ -1570,6 +1763,13 @@
                         indicator.classList.add('failure-indicator');
                         indicator.textContent = '✗';
                         indicator.title = `Failure (${effectiveValue})`;
+                    }
+                    
+                    // Adjust indicator size for small cards
+                    if (this.isParallelActive) {
+                        indicator.style.width = '18px';
+                        indicator.style.height = '18px';
+                        indicator.style.fontSize = '12px';
                     }
                     
                     cardWrapper.appendChild(indicator);
@@ -1810,6 +2010,10 @@
                     parallelRoundArea.classList.remove('round-inactive');
                 }
 
+                // Update round ordering and collapse states
+                this.updateRoundOrdering();
+                this.updateRoundCollapseState();
+
                 // Update button states - disable if flip three is active, frozen, busted, or at card limit
                 const flipThreeActive = this.isFlipThreeActive;
                 const hasAvailableCards = this.deck.length > 0 || this.drawnCards.length > 0;
@@ -2016,6 +2220,26 @@
                     if (e.target === document.getElementById('flipSevenOverlay')) {
                         document.getElementById('flipSevenOverlay').style.display = 'none';
                     }
+                });
+
+                // Round collapse toggle event listeners
+                document.getElementById('currentRoundToggle').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleCurrentRoundCollapse();
+                });
+
+                document.getElementById('parallelRoundToggle').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleParallelRoundCollapse();
+                });
+
+                // Round header click to toggle collapse
+                document.getElementById('currentRoundHeader').addEventListener('click', () => {
+                    this.toggleCurrentRoundCollapse();
+                });
+
+                document.getElementById('parallelRoundHeader').addEventListener('click', () => {
+                    this.toggleParallelRoundCollapse();
                 });
             }
         }
