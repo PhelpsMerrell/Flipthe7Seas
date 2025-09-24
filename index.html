@@ -150,11 +150,39 @@
             color: #64B5F6;
         }
 
+        .round-title.busted {
+            color: #FF6B6B;
+        }
+
+        .round-title.frozen-busted {
+            color: #FF8A65;
+        }
+
         .freeze-indicator {
             display: inline-block;
             margin-left: 10px;
             padding: 5px 10px;
             background: linear-gradient(145deg, #2196F3, #1976D2);
+            border-radius: 15px;
+            font-size: 14px;
+            animation: pulse 2s infinite;
+        }
+
+        .bust-indicator {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 5px 10px;
+            background: linear-gradient(145deg, #F44336, #D32F2F);
+            border-radius: 15px;
+            font-size: 14px;
+            animation: pulse 2s infinite;
+        }
+
+        .combined-indicator {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 5px 10px;
+            background: linear-gradient(145deg, #FF7043, #FF5722);
             border-radius: 15px;
             font-size: 14px;
             animation: pulse 2s infinite;
@@ -546,6 +574,7 @@
                 this.selectedFlipThreeCard = null;
                 this.isFlipThreeActive = false;
                 this.isFrozen = false;
+                this.isBusted = false;
                 this.initializeEventListeners();
                 this.updateDisplay();
             }
@@ -591,7 +620,8 @@
                     deck: [...this.deck],
                     drawnCards: [...this.drawnCards],
                     currentRound: [...this.currentRound],
-                    isFrozen: this.isFrozen
+                    isFrozen: this.isFrozen,
+                    isBusted: this.isBusted
                 });
             }
 
@@ -604,8 +634,8 @@
                     if (this.deck.length === 0) return null;
                 }
 
-                // Check if frozen or at 7-card limit
-                if (this.isFrozen || this.currentRound.length >= 7) {
+                // Check if frozen, busted, or at 7-card limit
+                if (this.isFrozen || this.isBusted || this.currentRound.length >= 7) {
                     return null;
                 }
 
@@ -623,11 +653,29 @@
                         this.currentRound.push(card);
                     }
                 } else {
+                    // For number and modifier cards, check for bust
                     this.currentRound.push(card);
+                    
+                    // Check for bust after adding the card
+                    if (card.type === 'number') {
+                        this.checkForBust(card);
+                    }
                 }
                 
                 this.updateDisplay();
                 return card;
+            }
+
+            checkForBust(newCard) {
+                // Count occurrences of this number value in current round
+                const sameValueCards = this.currentRound.filter(card => 
+                    card.type === 'number' && card.value === newCard.value
+                );
+                
+                // If we have more than one card with the same number value, it's a bust
+                if (sameValueCards.length > 1) {
+                    this.isBusted = true;
+                }
             }
 
             handleFreeze(freezeCard) {
@@ -778,6 +826,7 @@
                 this.drawnCards.push(...this.currentRound);
                 this.currentRound = [];
                 this.isFrozen = false; // Unfreeze when ending round
+                this.isBusted = false; // Unbust when ending round
                 this.updateDisplay();
             }
 
@@ -789,6 +838,7 @@
                 this.drawnCards = previousState.drawnCards;
                 this.currentRound = previousState.currentRound;
                 this.isFrozen = previousState.isFrozen !== undefined ? previousState.isFrozen : false;
+                this.isBusted = previousState.isBusted !== undefined ? previousState.isBusted : false;
                 this.updateDisplay();
             }
 
@@ -806,6 +856,7 @@
                 this.drawnCards = [];
                 this.currentRound = [];
                 this.isFrozen = false; // Unfreeze when shuffling all
+                this.isBusted = false; // Unbust when shuffling all
                 this.shuffleDeck();
                 this.updateDisplay();
             }
@@ -891,15 +942,25 @@
                     deckPile.style.opacity = '1';
                 }
 
-                // Update round title with freeze indicator
+                // Update round title with freeze/bust indicators
                 const roundTitle = document.getElementById('roundTitle');
-                if (this.isFrozen) {
-                    roundTitle.className = 'round-title frozen';
-                    roundTitle.innerHTML = 'Current Round <span class="freeze-indicator">❄️ FROZEN</span>';
-                } else {
-                    roundTitle.className = 'round-title';
-                    roundTitle.textContent = 'Current Round';
+                let titleText = 'Current Round';
+                let titleClass = 'round-title';
+                let indicators = [];
+                
+                if (this.isFrozen && this.isBusted) {
+                    titleClass = 'round-title frozen-busted';
+                    indicators.push('<span class="combined-indicator">❄️💥 FROZEN & BUST</span>');
+                } else if (this.isFrozen) {
+                    titleClass = 'round-title frozen';
+                    indicators.push('<span class="freeze-indicator">❄️ FROZEN</span>');
+                } else if (this.isBusted) {
+                    titleClass = 'round-title busted';
+                    indicators.push('<span class="bust-indicator">💥 BUST</span>');
                 }
+                
+                roundTitle.className = titleClass;
+                roundTitle.innerHTML = titleText + indicators.join('');
 
                 // Update current round display
                 const roundCardsContainer = document.getElementById('currentRoundCards');
@@ -908,9 +969,9 @@
                     roundCardsContainer.appendChild(this.createCardElement(card, true));
                 });
 
-                // Update button states - disable if flip three is active, frozen, or at card limit
+                // Update button states - disable if flip three is active, frozen, busted, or at card limit
                 const flipThreeActive = this.isFlipThreeActive;
-                const cannotDraw = flipThreeActive || this.isFrozen || this.currentRound.length >= 7 || this.deck.length === 0;
+                const cannotDraw = flipThreeActive || this.isFrozen || this.isBusted || this.currentRound.length >= 7 || this.deck.length === 0;
                 
                 document.getElementById('drawCard').disabled = cannotDraw;
                 document.getElementById('endRound').disabled = flipThreeActive || this.currentRound.length === 0;
@@ -957,7 +1018,8 @@
                     drawnCards: this.drawnCards,
                     currentRound: this.currentRound,
                     history: this.history,
-                    isFrozen: this.isFrozen
+                    isFrozen: this.isFrozen,
+                    isBusted: this.isBusted
                 };
                 
                 const gameStateText = document.getElementById('gameStateText');
@@ -982,6 +1044,7 @@
                     this.currentRound = gameState.currentRound;
                     this.history = gameState.history || [];
                     this.isFrozen = gameState.isFrozen || false;
+                    this.isBusted = gameState.isBusted || false;
                     
                     this.updateDisplay();
                     alert('Game state imported successfully!');
