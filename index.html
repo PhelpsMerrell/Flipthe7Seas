@@ -146,6 +146,26 @@
             font-weight: bold;
         }
 
+        .round-title.frozen {
+            color: #64B5F6;
+        }
+
+        .freeze-indicator {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 5px 10px;
+            background: linear-gradient(145deg, #2196F3, #1976D2);
+            border-radius: 15px;
+            font-size: 14px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
         .round-cards {
             display: flex;
             flex-wrap: nowrap;
@@ -461,7 +481,7 @@
         </div>
 
         <div class="current-round">
-            <div class="round-title">Current Round</div>
+            <div class="round-title" id="roundTitle">Current Round</div>
             <div class="round-cards" id="currentRoundCards"></div>
         </div>
 
@@ -525,6 +545,7 @@
                 this.flipThreeCards = [];
                 this.selectedFlipThreeCard = null;
                 this.isFlipThreeActive = false;
+                this.isFrozen = false;
                 this.initializeEventListeners();
                 this.updateDisplay();
             }
@@ -569,7 +590,8 @@
                 this.history.push({
                     deck: [...this.deck],
                     drawnCards: [...this.drawnCards],
-                    currentRound: [...this.currentRound]
+                    currentRound: [...this.currentRound],
+                    isFrozen: this.isFrozen
                 });
             }
 
@@ -582,23 +604,37 @@
                     if (this.deck.length === 0) return null;
                 }
 
-                // Limit to 7 cards per round
-                if (this.currentRound.length >= 7) {
+                // Check if frozen or at 7-card limit
+                if (this.isFrozen || this.currentRound.length >= 7) {
                     return null;
                 }
 
                 this.saveState();
                 const card = this.deck.pop();
                 
-                // Check if this is a "Flip Three" action card
-                if (card.type === 'action' && card.value === 'flip_three') {
-                    this.handleFlipThree(card);
+                // Check if this is an action card
+                if (card.type === 'action') {
+                    if (card.value === 'flip_three') {
+                        this.handleFlipThree(card);
+                    } else if (card.value === 'freeze') {
+                        this.handleFreeze(card);
+                    } else {
+                        // Other action cards just go to current round
+                        this.currentRound.push(card);
+                    }
                 } else {
                     this.currentRound.push(card);
                 }
                 
                 this.updateDisplay();
                 return card;
+            }
+
+            handleFreeze(freezeCard) {
+                // Add freeze card to current round
+                this.currentRound.push(freezeCard);
+                // Set frozen state
+                this.isFrozen = true;
             }
 
             handleFlipThree(flipThreeCard) {
@@ -741,6 +777,7 @@
                 this.saveState();
                 this.drawnCards.push(...this.currentRound);
                 this.currentRound = [];
+                this.isFrozen = false; // Unfreeze when ending round
                 this.updateDisplay();
             }
 
@@ -751,6 +788,7 @@
                 this.deck = previousState.deck;
                 this.drawnCards = previousState.drawnCards;
                 this.currentRound = previousState.currentRound;
+                this.isFrozen = previousState.isFrozen !== undefined ? previousState.isFrozen : false;
                 this.updateDisplay();
             }
 
@@ -767,6 +805,7 @@
                 this.deck.push(...this.drawnCards, ...this.currentRound);
                 this.drawnCards = [];
                 this.currentRound = [];
+                this.isFrozen = false; // Unfreeze when shuffling all
                 this.shuffleDeck();
                 this.updateDisplay();
             }
@@ -852,6 +891,16 @@
                     deckPile.style.opacity = '1';
                 }
 
+                // Update round title with freeze indicator
+                const roundTitle = document.getElementById('roundTitle');
+                if (this.isFrozen) {
+                    roundTitle.className = 'round-title frozen';
+                    roundTitle.innerHTML = 'Current Round <span class="freeze-indicator">❄️ FROZEN</span>';
+                } else {
+                    roundTitle.className = 'round-title';
+                    roundTitle.textContent = 'Current Round';
+                }
+
                 // Update current round display
                 const roundCardsContainer = document.getElementById('currentRoundCards');
                 roundCardsContainer.innerHTML = '';
@@ -859,9 +908,11 @@
                     roundCardsContainer.appendChild(this.createCardElement(card, true));
                 });
 
-                // Update button states - disable if flip three is active
+                // Update button states - disable if flip three is active, frozen, or at card limit
                 const flipThreeActive = this.isFlipThreeActive;
-                document.getElementById('drawCard').disabled = flipThreeActive || this.currentRound.length >= 7 || this.deck.length === 0;
+                const cannotDraw = flipThreeActive || this.isFrozen || this.currentRound.length >= 7 || this.deck.length === 0;
+                
+                document.getElementById('drawCard').disabled = cannotDraw;
                 document.getElementById('endRound').disabled = flipThreeActive || this.currentRound.length === 0;
                 document.getElementById('undoAction').disabled = flipThreeActive || this.history.length === 0;
                 document.getElementById('shuffleRemaining').disabled = flipThreeActive;
@@ -905,7 +956,8 @@
                     deck: this.deck,
                     drawnCards: this.drawnCards,
                     currentRound: this.currentRound,
-                    history: this.history
+                    history: this.history,
+                    isFrozen: this.isFrozen
                 };
                 
                 const gameStateText = document.getElementById('gameStateText');
@@ -929,6 +981,7 @@
                     this.drawnCards = gameState.drawnCards;
                     this.currentRound = gameState.currentRound;
                     this.history = gameState.history || [];
+                    this.isFrozen = gameState.isFrozen || false;
                     
                     this.updateDisplay();
                     alert('Game state imported successfully!');
