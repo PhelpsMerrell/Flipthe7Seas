@@ -223,9 +223,98 @@
             animation: powerGlow 2s infinite;
         }
 
-        @keyframes powerGlow {
-            0%, 100% { box-shadow: 0 0 5px rgba(138, 43, 226, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(138, 43, 226, 0.8); }
+        .flip-seven-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .flip-seven-modal {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            color: #333;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            animation: flipSevenCelebration 1s ease-out;
+            border: 3px solid #FF6B35;
+        }
+
+        .flip-seven-title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .flip-seven-message {
+            font-size: 24px;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .flip-seven-numbers {
+            font-size: 18px;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.3);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .flip-seven-button {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .flip-seven-button:hover {
+            background: linear-gradient(145deg, #45a049, #3d8b40);
+            transform: scale(1.05);
+        }
+
+        @keyframes flipSevenCelebration {
+            0% {
+                transform: scale(0.5) rotate(-10deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1) rotate(5deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .flip-seven-indicator {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 5px 15px;
+            background: linear-gradient(145deg, #FFD700, #FFA500);
+            border-radius: 15px;
+            font-size: 14px;
+            animation: flipSevenGlow 2s infinite;
+            color: #333;
+            font-weight: bold;
+        }
+
+        @keyframes flipSevenGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.8); }
+            50% { box-shadow: 0 0 25px rgba(255, 215, 0, 1), 0 0 35px rgba(255, 165, 0, 0.8); }
         }
 
         .round-title {
@@ -243,8 +332,17 @@
             color: #FF6B6B;
         }
 
+        .round-title.flip-seven {
+            color: #FFD700;
+        }
+
         .round-title.frozen-busted {
             color: #FF8A65;
+        }
+
+        @keyframes powerGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(138, 43, 226, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(138, 43, 226, 0.8); }
         }
 
         .freeze-indicator {
@@ -669,6 +767,15 @@
         </div>
     </div>
 
+    <div class="flip-seven-overlay" id="flipSevenOverlay">
+        <div class="flip-seven-modal">
+            <div class="flip-seven-title">🎉 FLIP 7! 🎉</div>
+            <div class="flip-seven-message">Incredible! You got 7 unique numbers!</div>
+            <div class="flip-seven-numbers" id="flipSevenNumbers"></div>
+            <button class="flip-seven-button" id="closeFlipSeven">Awesome!</button>
+        </div>
+    </div>
+
     <script>
         class CardDeckApp {
             constructor() {
@@ -682,6 +789,7 @@
                 this.isFlipThreeActive = false;
                 this.isFrozen = false;
                 this.isBusted = false;
+                this.hasFlipSeven = false; // Track if achieved 7 unique numbers
                 this.selectedCardForBoost = null; // For power card application
                 this.initializeEventListeners();
                 this.updateDisplay();
@@ -785,6 +893,8 @@
                     // Check for bust after adding the card
                     if (card.type === 'number') {
                         this.checkForBust(card);
+                        // Check for Flip 7 achievement after adding number card
+                        this.checkForFlipSeven();
                     }
                 }
                 
@@ -906,6 +1016,34 @@
                 if (sameValueCards.length > 1) {
                     this.isBusted = true;
                 }
+            }
+
+            checkForFlipSeven() {
+                // Get all number cards in current round
+                const numberCards = this.currentRound.filter(card => card.type === 'number');
+                
+                // Get unique number values
+                const uniqueNumbers = new Set(numberCards.map(card => card.value));
+                
+                // Check if we have exactly 7 unique numbers
+                if (uniqueNumbers.size === 7 && !this.hasFlipSeven) {
+                    this.hasFlipSeven = true;
+                    this.showFlipSevenCelebration(Array.from(uniqueNumbers).sort((a, b) => a - b));
+                    return true;
+                }
+                
+                return false;
+            }
+
+            showFlipSevenCelebration(uniqueNumbers) {
+                const overlay = document.getElementById('flipSevenOverlay');
+                const numbersContainer = document.getElementById('flipSevenNumbers');
+                
+                // Display the unique numbers
+                numbersContainer.textContent = `Numbers achieved: ${uniqueNumbers.join(', ')}`;
+                
+                // Show the modal
+                overlay.style.display = 'flex';
             }
 
             handleFreeze(freezeCard) {
@@ -1090,6 +1228,7 @@
                 this.powerCards = [];
                 this.isFrozen = false; // Unfreeze when ending round
                 this.isBusted = false; // Unbust when ending round
+                this.hasFlipSeven = false; // Reset flip seven when ending round
                 this.updateDisplay();
             }
 
@@ -1298,7 +1437,10 @@
                 let titleClass = 'round-title';
                 let indicators = [];
                 
-                if (this.isFrozen && this.isBusted) {
+                if (this.hasFlipSeven) {
+                    titleClass = 'round-title flip-seven';
+                    indicators.push('<span class="flip-seven-indicator">🎉 FLIP 7!</span>');
+                } else if (this.isFrozen && this.isBusted) {
                     titleClass = 'round-title frozen-busted';
                     indicators.push('<span class="combined-indicator">❄️💥 FROZEN & BUST</span>');
                 } else if (this.isFrozen) {
@@ -1484,6 +1626,18 @@
                 document.getElementById('flipThreeOverlay').addEventListener('click', (e) => {
                     if (e.target === document.getElementById('flipThreeOverlay')) {
                         this.cancelFlipThreeSelection();
+                    }
+                });
+
+                // Flip Seven modal event listeners
+                document.getElementById('closeFlipSeven').addEventListener('click', () => {
+                    document.getElementById('flipSevenOverlay').style.display = 'none';
+                });
+
+                // Close flip seven modal when clicking overlay
+                document.getElementById('flipSevenOverlay').addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('flipSevenOverlay')) {
+                        document.getElementById('flipSevenOverlay').style.display = 'none';
                     }
                 });
             }
