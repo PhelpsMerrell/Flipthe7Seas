@@ -139,6 +139,26 @@
             min-height: 250px;
         }
 
+        .parallel-round {
+            background: rgba(255,140,0,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            min-height: 250px;
+            border: 2px solid rgba(255,140,0,0.3);
+            display: none;
+        }
+
+        .parallel-round.active {
+            display: block;
+        }
+
+        .round-inactive {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
         .second-chance-area {
             background: rgba(138,43,226,0.1);
             border-radius: 15px;
@@ -712,9 +732,14 @@
             </div>
         </div>
 
-        <div class="current-round">
+        <div class="current-round" id="currentRoundArea">
             <div class="round-title" id="roundTitle">Current Round</div>
             <div class="round-cards" id="currentRoundCards"></div>
+        </div>
+
+        <div class="parallel-round" id="parallelRoundArea">
+            <div class="round-title" id="parallelRoundTitle">Parallel Round (X2)</div>
+            <div class="round-cards" id="parallelRoundCards"></div>
         </div>
 
         <div class="deck-area">
@@ -791,6 +816,15 @@
                 this.isBusted = false;
                 this.hasFlipSeven = false; // Track if achieved 7 unique numbers
                 this.selectedCardForBoost = null; // For power card application
+                
+                // Parallel round state
+                this.isParallelActive = false;
+                this.parallelRound = [];
+                this.parallelIsFrozen = false;
+                this.parallelIsBusted = false;
+                this.parallelHasFlipSeven = false;
+                this.activeRound = 'main'; // 'main' or 'parallel'
+                
                 this.initializeEventListeners();
                 this.updateDisplay();
             }
@@ -838,13 +872,52 @@
                     currentRound: [...this.currentRound],
                     powerCards: [...this.powerCards],
                     isFrozen: this.isFrozen,
-                    isBusted: this.isBusted
+                    isBusted: this.isBusted,
+                    isParallelActive: this.isParallelActive,
+                    parallelRound: [...this.parallelRound],
+                    parallelIsFrozen: this.parallelIsFrozen,
+                    parallelIsBusted: this.parallelIsBusted,
+                    parallelHasFlipSeven: this.parallelHasFlipSeven,
+                    activeRound: this.activeRound
                 });
             }
 
+            getActiveRoundData() {
+                if (this.activeRound === 'parallel') {
+                    return {
+                        round: this.parallelRound,
+                        isFrozen: this.parallelIsFrozen,
+                        isBusted: this.parallelIsBusted,
+                        hasFlipSeven: this.parallelHasFlipSeven
+                    };
+                } else {
+                    return {
+                        round: this.currentRound,
+                        isFrozen: this.isFrozen,
+                        isBusted: this.isBusted,
+                        hasFlipSeven: this.hasFlipSeven
+                    };
+                }
+            }
+
+            setActiveRoundData(property, value) {
+                if (this.activeRound === 'parallel') {
+                    this[`parallel${property.charAt(0).toUpperCase() + property.slice(1)}`] = value;
+                } else {
+                    this[property] = value;
+                }
+            }
+
             drawCard() {
-                // Check if frozen, busted, or at 7-card limit first
-                if (this.isFrozen || this.isBusted || this.currentRound.length >= 7) {
+                console.log('drawCard method called');
+                
+                // Get active round state
+                const activeRoundData = this.getActiveRoundData();
+                console.log('activeRoundData:', activeRoundData);
+                
+                // Check if active round is frozen, busted, or at 7-card limit first
+                if (activeRoundData.isFrozen || activeRoundData.isBusted || activeRoundData.round.length >= 7) {
+                    console.log('Cannot draw: round state prevents it');
                     return null;
                 }
 
@@ -876,25 +949,25 @@
                     if (card.value === 'flip_three') {
                         this.handleFlipThree(card);
                     } else if (card.value === 'freeze') {
-                        this.handleFreeze(card);
+                        this.handleFreeze(card, this.activeRound);
                     } else if (card.value === 'second_chance') {
                         this.handleSecondChance(card);
                     } else {
-                        // Other action cards just go to current round
-                        this.currentRound.push(card);
+                        // Other action cards go to active round
+                        activeRoundData.round.push(card);
                     }
                 } else if (card.type === 'modifier') {
                     // Modifier cards go to power cards area
                     this.handlePowerCard(card);
                 } else {
-                    // For number cards, check for bust
-                    this.currentRound.push(card);
+                    // For number cards, add to active round and check for bust
+                    activeRoundData.round.push(card);
                     
                     // Check for bust after adding the card
                     if (card.type === 'number') {
-                        this.checkForBust(card);
+                        this.checkForBust(card, this.activeRound);
                         // Check for Flip 7 achievement after adding number card
-                        this.checkForFlipSeven();
+                        this.checkForFlipSeven(this.activeRound);
                     }
                 }
                 
@@ -912,13 +985,78 @@
                 this.powerCards.push(powerCard);
             }
 
-            applyPowerCard(powerIndex, targetCardIndex) {
-                if (powerIndex >= this.powerCards.length || targetCardIndex >= this.currentRound.length) {
+            activateX2Card(powerIndex) {
+                if (powerIndex >= this.powerCards.length || this.isParallelActive) {
                     return false;
                 }
 
                 const powerCard = this.powerCards[powerIndex];
-                const targetCard = this.currentRound[targetCardIndex];
+                
+                // Only x2 cards can activate parallel rounds
+                if (powerCard.type !== 'modifier' || powerCard.value !== 'x2') {
+                    return false;
+                }
+
+                this.saveState();
+
+                // Activate parallel round
+                this.isParallelActive = true;
+                this.parallelRound = [];
+                this.parallelIsFrozen = false;
+                this.parallelIsBusted = false;
+                this.parallelHasFlipSeven = false;
+                this.activeRound = 'parallel';
+
+                // Remove the x2 card from power cards (it will go to drawn pile when both rounds complete)
+                const usedX2Card = this.powerCards.splice(powerIndex, 1)[0];
+                // Keep the x2 card in a temporary holding area until both rounds complete
+                this.usedX2Card = usedX2Card;
+
+                this.updateDisplay();
+                return true;
+            }
+
+            applyPowerCard(powerIndex, targetCardIndex) {
+                const activeRoundData = this.getActiveRoundData();
+                if (powerIndex >= this.powerCards.length || targetCardIndex >= activeRoundData.round.length) {
+                    return false;
+                }
+
+                const powerCard = this.powerCards[powerIndex];
+                const targetCard = activeRoundData.round[targetCardIndex];
+
+                // Only apply to number cards
+                if (targetCard.type !== 'number') {
+                    return false;
+                }
+
+                this.saveState();
+
+                // Apply the power card effect
+                if (powerCard.value === 'x2') {
+                    targetCard.boostedValue = targetCard.value * 2;
+                } else if (typeof powerCard.value === 'number') {
+                    targetCard.boostedValue = targetCard.value + powerCard.value;
+                }
+
+                // Mark card as boosted
+                targetCard.isBoosted = true;
+
+                // Remove the power card and move to drawn pile
+                const usedPowerCard = this.powerCards.splice(powerIndex, 1)[0];
+                this.drawnCards.push(usedPowerCard);
+
+                this.updateDisplay();
+                return true;
+            }
+
+            applyPowerCardToParallel(powerIndex, targetCardIndex) {
+                if (powerIndex >= this.powerCards.length || targetCardIndex >= this.parallelRound.length) {
+                    return false;
+                }
+
+                const powerCard = this.powerCards[powerIndex];
+                const targetCard = this.parallelRound[targetCardIndex];
 
                 // Only apply to number cards
                 if (targetCard.type !== 'number') {
@@ -951,7 +1089,8 @@
             }
 
             useSecondChance(secondChanceIndex) {
-                if (!this.isBusted || secondChanceIndex >= this.powerCards.length) {
+                const activeRoundData = this.getActiveRoundData();
+                if (!activeRoundData.isBusted || secondChanceIndex >= this.powerCards.length) {
                     return false;
                 }
 
@@ -968,19 +1107,21 @@
                 const usedSecondChance = this.powerCards.splice(secondChanceIndex, 1)[0];
                 this.drawnCards.push(usedSecondChance);
 
-                // Find and remove the bust-causing duplicate card
-                this.removeBustCard();
+                // Find and remove the bust-causing duplicate card from active round
+                this.removeBustCard(this.activeRound);
 
-                // Clear bust state
-                this.isBusted = false;
+                // Clear bust state for active round
+                this.setActiveRoundData('isBusted', false);
 
                 this.updateDisplay();
                 return true;
             }
 
-            removeBustCard() {
-                // Find duplicate number cards
-                const numberCards = this.currentRound.filter(card => card.type === 'number');
+            removeBustCard(roundType = 'main') {
+                const round = roundType === 'parallel' ? this.parallelRound : this.currentRound;
+                
+                // Find duplicate number cards in the specified round
+                const numberCards = round.filter(card => card.type === 'number');
                 const cardCounts = {};
                 
                 // Count occurrences of each number
@@ -996,9 +1137,9 @@
                 for (const value in cardCounts) {
                     if (cardCounts[value].length > 1) {
                         const duplicateCard = cardCounts[value][cardCounts[value].length - 1];
-                        const cardIndex = this.currentRound.findIndex(card => card.id === duplicateCard.id);
+                        const cardIndex = round.findIndex(card => card.id === duplicateCard.id);
                         if (cardIndex !== -1) {
-                            const removedCard = this.currentRound.splice(cardIndex, 1)[0];
+                            const removedCard = round.splice(cardIndex, 1)[0];
                             this.drawnCards.push(removedCard);
                             break; // Only remove one card
                         }
@@ -1006,51 +1147,62 @@
                 }
             }
 
-            checkForBust(newCard) {
-                // Count occurrences of this number value in current round
-                const sameValueCards = this.currentRound.filter(card => 
+            checkForBust(newCard, roundType = 'main') {
+                const round = roundType === 'parallel' ? this.parallelRound : this.currentRound;
+                
+                // Count occurrences of this number value in specified round
+                const sameValueCards = round.filter(card => 
                     card.type === 'number' && card.value === newCard.value
                 );
                 
                 // If we have more than one card with the same number value, it's a bust
                 if (sameValueCards.length > 1) {
-                    this.isBusted = true;
+                    this.setActiveRoundData('isBusted', true);
                 }
             }
 
-            checkForFlipSeven() {
-                // Get all number cards in current round
-                const numberCards = this.currentRound.filter(card => card.type === 'number');
+            checkForFlipSeven(roundType = 'main') {
+                const round = roundType === 'parallel' ? this.parallelRound : this.currentRound;
+                const hasFlipSeven = roundType === 'parallel' ? this.parallelHasFlipSeven : this.hasFlipSeven;
+                
+                // Get all number cards in specified round
+                const numberCards = round.filter(card => card.type === 'number');
                 
                 // Get unique number values
                 const uniqueNumbers = new Set(numberCards.map(card => card.value));
                 
                 // Check if we have exactly 7 unique numbers
-                if (uniqueNumbers.size === 7 && !this.hasFlipSeven) {
-                    this.hasFlipSeven = true;
-                    this.showFlipSevenCelebration(Array.from(uniqueNumbers).sort((a, b) => a - b));
+                if (uniqueNumbers.size === 7 && !hasFlipSeven) {
+                    this.setActiveRoundData('hasFlipSeven', true);
+                    this.showFlipSevenCelebration(Array.from(uniqueNumbers).sort((a, b) => a - b), roundType);
                     return true;
                 }
                 
                 return false;
             }
 
-            showFlipSevenCelebration(uniqueNumbers) {
+            showFlipSevenCelebration(uniqueNumbers, roundType = 'main') {
                 const overlay = document.getElementById('flipSevenOverlay');
                 const numbersContainer = document.getElementById('flipSevenNumbers');
+                const titleContainer = document.querySelector('.flip-seven-title');
                 
-                // Display the unique numbers
-                numbersContainer.textContent = `Numbers achieved: ${uniqueNumbers.join(', ')}`;
+                // Display the unique numbers with round type
+                numbersContainer.textContent = `Numbers achieved in ${roundType === 'parallel' ? 'Parallel' : 'Main'} round: ${uniqueNumbers.join(', ')}`;
+                titleContainer.textContent = `🎉 FLIP 7 ${roundType === 'parallel' ? '(Parallel)' : ''}! 🎉`;
                 
                 // Show the modal
                 overlay.style.display = 'flex';
             }
 
-            handleFreeze(freezeCard) {
-                // Add freeze card to current round
-                this.currentRound.push(freezeCard);
-                // Set frozen state
-                this.isFrozen = true;
+            handleFreeze(freezeCard, roundType = 'main') {
+                // Add freeze card to the specified round
+                if (roundType === 'parallel') {
+                    this.parallelRound.push(freezeCard);
+                    this.parallelIsFrozen = true;
+                } else {
+                    this.currentRound.push(freezeCard);
+                    this.isFrozen = true;
+                }
             }
 
             handleFlipThree(flipThreeCard) {
@@ -1219,17 +1371,59 @@
             }
 
             endRound() {
-                if (this.currentRound.length === 0 || this.isFlipThreeActive) return;
+                if (this.isFlipThreeActive) return;
+                
+                const activeRoundData = this.getActiveRoundData();
+                if (activeRoundData.round.length === 0) return;
                 
                 this.saveState();
-                this.drawnCards.push(...this.currentRound);
-                this.drawnCards.push(...this.powerCards); // Move power cards to drawn pile
-                this.currentRound = [];
-                this.powerCards = [];
-                this.isFrozen = false; // Unfreeze when ending round
-                this.isBusted = false; // Unbust when ending round
-                this.hasFlipSeven = false; // Reset flip seven when ending round
+                
+                if (this.isParallelActive) {
+                    if (this.activeRound === 'main') {
+                        // End main round, switch to parallel round
+                        this.activeRound = 'parallel';
+                    } else {
+                        // End parallel round, check if both rounds are complete
+                        this.completeParallelRounds();
+                    }
+                } else {
+                    // Normal single round completion
+                    this.drawnCards.push(...this.currentRound);
+                    this.drawnCards.push(...this.powerCards);
+                    this.currentRound = [];
+                    this.powerCards = [];
+                    this.isFrozen = false;
+                    this.isBusted = false;
+                    this.hasFlipSeven = false;
+                }
+                
                 this.updateDisplay();
+            }
+            
+            completeParallelRounds() {
+                // Move all cards from both rounds and power cards to drawn pile
+                this.drawnCards.push(...this.currentRound);
+                this.drawnCards.push(...this.parallelRound);
+                this.drawnCards.push(...this.powerCards);
+                
+                // Add the used x2 card to drawn pile
+                if (this.usedX2Card) {
+                    this.drawnCards.push(this.usedX2Card);
+                    this.usedX2Card = null;
+                }
+                
+                // Reset all round states
+                this.currentRound = [];
+                this.parallelRound = [];
+                this.powerCards = [];
+                this.isParallelActive = false;
+                this.activeRound = 'main';
+                this.isFrozen = false;
+                this.isBusted = false;
+                this.hasFlipSeven = false;
+                this.parallelIsFrozen = false;
+                this.parallelIsBusted = false;
+                this.parallelHasFlipSeven = false;
             }
 
             undoAction() {
@@ -1242,6 +1436,15 @@
                 this.powerCards = previousState.powerCards || [];
                 this.isFrozen = previousState.isFrozen !== undefined ? previousState.isFrozen : false;
                 this.isBusted = previousState.isBusted !== undefined ? previousState.isBusted : false;
+                
+                // Restore parallel round state if it exists
+                this.isParallelActive = previousState.isParallelActive || false;
+                this.parallelRound = previousState.parallelRound || [];
+                this.parallelIsFrozen = previousState.parallelIsFrozen || false;
+                this.parallelIsBusted = previousState.parallelIsBusted || false;
+                this.parallelHasFlipSeven = previousState.parallelHasFlipSeven || false;
+                this.activeRound = previousState.activeRound || 'main';
+                
                 this.updateDisplay();
             }
 
@@ -1255,12 +1458,31 @@
             shuffleAllCards() {
                 if (this.isFlipThreeActive) return;
                 this.saveState();
+                
+                // Add all cards back to deck
                 this.deck.push(...this.drawnCards, ...this.currentRound, ...this.powerCards);
+                if (this.isParallelActive) {
+                    this.deck.push(...this.parallelRound);
+                    if (this.usedX2Card) {
+                        this.deck.push(this.usedX2Card);
+                        this.usedX2Card = null;
+                    }
+                }
+                
+                // Reset all states
                 this.drawnCards = [];
                 this.currentRound = [];
+                this.parallelRound = [];
                 this.powerCards = [];
-                this.isFrozen = false; // Unfreeze when shuffling all
-                this.isBusted = false; // Unbust when shuffling all
+                this.isParallelActive = false;
+                this.activeRound = 'main';
+                this.isFrozen = false;
+                this.isBusted = false;
+                this.hasFlipSeven = false;
+                this.parallelIsFrozen = false;
+                this.parallelIsBusted = false;
+                this.parallelHasFlipSeven = false;
+                
                 this.shuffleDeck();
                 this.updateDisplay();
             }
@@ -1384,8 +1606,9 @@
                         cardElement.className = 'second-chance-card';
                         
                         if (card.type === 'action' && card.value === 'second_chance') {
-                            // Second Chance cards - clickable if busted
-                            if (this.isBusted) {
+                            // Second Chance cards - clickable if active round is busted
+                            const activeRoundData = this.getActiveRoundData();
+                            if (activeRoundData.isBusted) {
                                 cardElement.classList.add('clickable');
                                 cardElement.title = 'Click to remove a duplicate card and continue';
                                 cardElement.addEventListener('click', () => {
@@ -1395,16 +1618,30 @@
                                 cardElement.title = 'Can only use when busted';
                             }
                         } else if (card.type === 'modifier') {
-                            // Modifier cards - clickable to boost number cards
-                            const hasNumberCards = this.currentRound.some(c => c.type === 'number');
-                            if (hasNumberCards) {
-                                cardElement.classList.add('power-card-selectable');
-                                cardElement.title = 'Click to boost a number card';
-                                cardElement.addEventListener('click', () => {
-                                    this.selectPowerCardForBoosting(index);
-                                });
+                            if (card.value === 'x2') {
+                                // X2 cards - clickable to start parallel round or boost cards
+                                if (!this.isParallelActive) {
+                                    cardElement.classList.add('power-card-selectable');
+                                    cardElement.title = 'Click to start parallel round';
+                                    cardElement.addEventListener('click', () => {
+                                        this.activateX2Card(index);
+                                    });
+                                } else {
+                                    cardElement.title = 'Parallel round already active';
+                                }
                             } else {
-                                cardElement.title = 'Need number cards in round to boost';
+                                // Other modifier cards - clickable to boost number cards
+                                const activeRoundData = this.getActiveRoundData();
+                                const hasNumberCards = activeRoundData.round.some(c => c.type === 'number');
+                                if (hasNumberCards) {
+                                    cardElement.classList.add('power-card-selectable');
+                                    cardElement.title = 'Click to boost a number card';
+                                    cardElement.addEventListener('click', () => {
+                                        this.selectPowerCardForBoosting(index);
+                                    });
+                                } else {
+                                    cardElement.title = 'Need number cards in round to boost';
+                                }
                             }
                         }
                         
@@ -1418,8 +1655,8 @@
                 this.currentRound.forEach((card, index) => {
                     const cardElement = this.createCardElement(card, true);
                     
-                    // Make number cards clickable if we have selected a power card
-                    if (this.selectedCardForBoost !== null && card.type === 'number' && !card.isBoosted) {
+                    // Make number cards clickable if we have selected a power card and this is the active round
+                    if (this.selectedCardForBoost !== null && card.type === 'number' && !card.isBoosted && this.activeRound === 'main') {
                         cardElement.style.cursor = 'pointer';
                         cardElement.style.animation = 'powerGlow 2s infinite';
                         cardElement.title = 'Click to apply power card';
@@ -1432,7 +1669,39 @@
                     roundCardsContainer.appendChild(cardElement);
                 });
 
+                // Update parallel round display if active
+                const parallelRoundArea = document.getElementById('parallelRoundArea');
+                const parallelRoundContainer = document.getElementById('parallelRoundCards');
+                
+                if (this.isParallelActive) {
+                    parallelRoundArea.classList.add('active');
+                    parallelRoundContainer.innerHTML = '';
+                    
+                    this.parallelRound.forEach((card, index) => {
+                        const cardElement = this.createCardElement(card, true);
+                        
+                        // Make number cards clickable if we have selected a power card and this is the active round
+                        if (this.selectedCardForBoost !== null && card.type === 'number' && !card.isBoosted && this.activeRound === 'parallel') {
+                            cardElement.style.cursor = 'pointer';
+                            cardElement.style.animation = 'powerGlow 2s infinite';
+                            cardElement.title = 'Click to apply power card';
+                            cardElement.addEventListener('click', () => {
+                                this.applyPowerCardToParallel(this.selectedCardForBoost, index);
+                                this.selectedCardForBoost = null;
+                            });
+                        }
+                        
+                        parallelRoundContainer.appendChild(cardElement);
+                    });
+                } else {
+                    parallelRoundArea.classList.remove('active');
+                }
+
+                // Update round titles and states
                 const roundTitle = document.getElementById('roundTitle');
+                const parallelRoundTitle = document.getElementById('parallelRoundTitle');
+                
+                // Update main round title
                 let titleText = 'Current Round';
                 let titleClass = 'round-title';
                 let indicators = [];
@@ -1451,16 +1720,84 @@
                     indicators.push('<span class="bust-indicator">💥 BUST</span>');
                 }
                 
+                // Add active round indicator if parallel is active
+                if (this.isParallelActive) {
+                    if (this.activeRound === 'main') {
+                        indicators.push('<span style="background: #4CAF50; padding: 3px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px;">ACTIVE</span>');
+                    } else {
+                        indicators.push('<span style="background: #666; padding: 3px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px;">COMPLETE</span>');
+                    }
+                }
+                
                 roundTitle.className = titleClass;
                 roundTitle.innerHTML = titleText + indicators.join('');
+                
+                // Update parallel round title if active
+                if (this.isParallelActive && parallelRoundTitle) {
+                    let parallelTitleText = 'Parallel Round (X2)';
+                    let parallelTitleClass = 'round-title';
+                    let parallelIndicators = [];
+                    
+                    if (this.parallelHasFlipSeven) {
+                        parallelTitleClass = 'round-title flip-seven';
+                        parallelIndicators.push('<span class="flip-seven-indicator">🎉 FLIP 7!</span>');
+                    } else if (this.parallelIsFrozen && this.parallelIsBusted) {
+                        parallelTitleClass = 'round-title frozen-busted';
+                        parallelIndicators.push('<span class="combined-indicator">❄️💥 FROZEN & BUST</span>');
+                    } else if (this.parallelIsFrozen) {
+                        parallelTitleClass = 'round-title frozen';
+                        parallelIndicators.push('<span class="freeze-indicator">❄️ FROZEN</span>');
+                    } else if (this.parallelIsBusted) {
+                        parallelTitleClass = 'round-title busted';
+                        parallelIndicators.push('<span class="bust-indicator">💥 BUST</span>');
+                    }
+                    
+                    // Add active round indicator
+                    if (this.activeRound === 'parallel') {
+                        parallelIndicators.push('<span style="background: #4CAF50; padding: 3px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px;">ACTIVE</span>');
+                    } else {
+                        parallelIndicators.push('<span style="background: #666; padding: 3px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px;">WAITING</span>');
+                    }
+                    
+                    parallelRoundTitle.className = parallelTitleClass;
+                    parallelRoundTitle.innerHTML = parallelTitleText + parallelIndicators.join('');
+                }
+                
+                // Update round areas to show active/inactive state
+                const currentRoundArea = document.getElementById('currentRoundArea');
+                
+                if (this.isParallelActive) {
+                    if (this.activeRound === 'main') {
+                        currentRoundArea.classList.remove('round-inactive');
+                        parallelRoundArea.classList.add('round-inactive');
+                    } else {
+                        currentRoundArea.classList.add('round-inactive');
+                        parallelRoundArea.classList.remove('round-inactive');
+                    }
+                } else {
+                    currentRoundArea.classList.remove('round-inactive');
+                    parallelRoundArea.classList.remove('round-inactive');
+                }
 
                 // Update button states - disable if flip three is active, frozen, busted, or at card limit
                 const flipThreeActive = this.isFlipThreeActive;
                 const hasAvailableCards = this.deck.length > 0 || this.drawnCards.length > 0;
-                const cannotDraw = flipThreeActive || this.isFrozen || this.isBusted || this.currentRound.length >= 7 || !hasAvailableCards;
+                const activeRoundData = this.getActiveRoundData();
+                const cannotDraw = flipThreeActive || activeRoundData.isFrozen || activeRoundData.isBusted || activeRoundData.round.length >= 7 || !hasAvailableCards;
+                
+                console.log('Button state check:', {
+                    flipThreeActive,
+                    hasAvailableCards,
+                    activeRoundData,
+                    cannotDraw
+                });
                 
                 document.getElementById('drawCard').disabled = cannotDraw;
-                document.getElementById('endRound').disabled = flipThreeActive || this.currentRound.length === 0;
+                
+                // End round button - check if active round has cards
+                const canEndRound = !flipThreeActive && activeRoundData.round.length > 0;
+                document.getElementById('endRound').disabled = !canEndRound;
+                
                 document.getElementById('undoAction').disabled = flipThreeActive || this.history.length === 0;
                 document.getElementById('shuffleRemaining').disabled = flipThreeActive;
                 document.getElementById('shuffleAll').disabled = flipThreeActive;
@@ -1506,7 +1843,14 @@
                     powerCards: this.powerCards,
                     history: this.history,
                     isFrozen: this.isFrozen,
-                    isBusted: this.isBusted
+                    isBusted: this.isBusted,
+                    isParallelActive: this.isParallelActive,
+                    parallelRound: this.parallelRound,
+                    parallelIsFrozen: this.parallelIsFrozen,
+                    parallelIsBusted: this.parallelIsBusted,
+                    parallelHasFlipSeven: this.parallelHasFlipSeven,
+                    activeRound: this.activeRound,
+                    usedX2Card: this.usedX2Card
                 };
                 
                 const gameStateText = document.getElementById('gameStateText');
@@ -1533,6 +1877,15 @@
                     this.history = gameState.history || [];
                     this.isFrozen = gameState.isFrozen || false;
                     this.isBusted = gameState.isBusted || false;
+                    
+                    // Import parallel round state
+                    this.isParallelActive = gameState.isParallelActive || false;
+                    this.parallelRound = gameState.parallelRound || [];
+                    this.parallelIsFrozen = gameState.parallelIsFrozen || false;
+                    this.parallelIsBusted = gameState.parallelIsBusted || false;
+                    this.parallelHasFlipSeven = gameState.parallelHasFlipSeven || false;
+                    this.activeRound = gameState.activeRound || 'main';
+                    this.usedX2Card = gameState.usedX2Card || null;
                     
                     this.updateDisplay();
                     alert('Game state imported successfully!');
