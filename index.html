@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Deck Application</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: linear-gradient(145deg, #45a049, #3d8b40);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .danger-btn {
+            background: linear-gradient(145deg, #f44336, #d32f2f);
+        }
+
+        .danger-btn:hover {
+            background: linear-gradient(145deg, #d32f2f, #b71c1c);
+        }
+
+        .deck-area {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .deck-pile, .drawn-pile {
+            text-align: center;
+        }
+
+        .pile-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .card-back {
+            width: 120px;
+            height: 180px;
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            transition: transform 0.3s;
+            border: 3px solid #fff;
+        }
+
+        .card-back:hover {
+            transform: scale(1.05);
+        }
+
+        .card-image {
+            width: 120px;
+            height: 180px;
+            border-radius: 12px;
+            border: 3px solid #fff;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        .current-round {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            min-height: 250px;
+        }
+
+        .round-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .round-cards {
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 15px;
+            justify-content: center;
+            min-height: 180px;
+            align-items: center;
+            overflow-x: auto;
+            padding: 15px;
+        }
+
+        .card-image-round {
+            width: 120px;
+            height: 180px;
+            border-radius: 12px;
+            border: 3px solid #fff;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .card-image-round:hover {
+            transform: scale(1.05);
+        }
+
+        .card-back-round {
+            width: 120px;
+            height: 180px;
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            border: 3px solid #fff;
+            transition: transform 0.3s;
+        }
+
+        .card-back-round:hover {
+            transform: scale(1.05);
+        }
+
+        .drawn-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .drawn-display {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #333;
+            padding: 5px;
+        }
+
+        .fanned-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            color: #333;
+        }
+
+        .fanned-card {
+            text-align: center;
+            padding: 8px 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            min-width: 80px;
+            width: 120px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .info-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .import-export {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        textarea {
+            width: 100%;
+            max-width: 600px;
+            height: 100px;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            font-family: monospace;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .flip-three-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .flip-three-modal {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+            text-align: center;
+            color: #333;
+        }
+
+        .flip-three-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .flip-three-description {
+            font-size: 16px;
+            margin-bottom: 25px;
+            color: #666;
+        }
+
+        .flip-three-cards {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .flip-three-card {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid transparent;
+        }
+
+        .flip-three-card:hover {
+            transform: scale(1.05);
+            border-color: #4CAF50;
+        }
+
+        .flip-three-card.selected {
+            border-color: #4CAF50;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+            transform: scale(1.05);
+        }
+
+        .flip-three-card img {
+            width: 120px;
+            height: 180px;
+            display: block;
+        }
+
+        .flip-three-card-fallback {
+            width: 120px;
+            height: 180px;
+            background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .flip-three-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .flip-three-buttons button {
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+
+        .confirm-btn {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+        }
+
+        .confirm-btn:hover {
+            background: linear-gradient(145deg, #45a049, #3d8b40);
+        }
+
+        .confirm-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .cancel-btn {
+            background: linear-gradient(145deg, #666, #555);
+        }
+
+        .cancel-btn:hover {
+            background: linear-gradient(145deg, #555, #444);
+        }
+
+        @media (max-width: 768px) {
+            .deck-area {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .controls {
+                justify-content: center;
+            }
+            
+            button {
+                padding: 10px 15px;
+                font-size: 12px;
+            }
+
+            .flip-three-modal {
+                padding: 20px;
+                margin: 20px;
+            }
+
+            .flip-three-cards {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .flip-three-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .flip-three-buttons button {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Card Deck Application</h1>
+
+        <div class="controls">
+            <button id="drawCard">Draw Card</button>
+            <button id="endRound" disabled>End Round</button>
+            <button id="undoAction" disabled>Undo</button>
+            <button id="shuffleRemaining">Shuffle Remaining</button>
+            <button id="shuffleAll" class="danger-btn">Shuffle All Back</button>
+        </div>
+
+        <div class="current-round">
+            <div class="round-title">Current Round</div>
+            <div class="round-cards" id="currentRoundCards"></div>
+        </div>
+
+        <div class="deck-area">
+            <div class="deck-pile">
+                <div class="pile-title">Deck</div>
+                <div class="card-back" id="deckPile">
+                    <img src="assets/card_back.png" alt="Card Back" class="card-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div style="display:none;">DECK</div>
+                </div>
+                <div style="margin-top: 10px; text-align: center; font-size: 18px; font-weight: bold;">
+                    <span id="cardsInDeck">94</span> cards
+                </div>
+            </div>
+            <div class="drawn-pile">
+                <div class="pile-title">Drawn Cards</div>
+                <div class="card-back" id="drawnPile" style="cursor: pointer;">
+                    <div>DRAWN<br><span id="drawnCount">0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="import-export">
+            <button id="exportGame">Export Game State</button>
+            <button id="importGame">Import Game State</button>
+            <br>
+            <textarea id="gameStateText" placeholder="Paste game state JSON here to import..." class="hidden"></textarea>
+            <br>
+            <button id="confirmImport" class="hidden">Confirm Import</button>
+            <button id="cancelImport" class="hidden">Cancel</button>
+        </div>
+    </div>
+
+    <div class="drawn-overlay" id="drawnOverlay">
+        <div class="drawn-display">
+            <button class="close-btn" id="closeDrawn">&times;</button>
+            <h2 style="color: #333; margin-bottom: 20px; text-align: center;">Drawn Cards</h2>
+            <div class="fanned-cards" id="fannedCards"></div>
+        </div>
+    </div>
+
+    <div class="flip-three-overlay" id="flipThreeOverlay">
+        <div class="flip-three-modal">
+            <div class="flip-three-title">Flip Three!</div>
+            <div class="flip-three-description">Choose one card to keep for your current round. The other cards will go to the drawn pile.</div>
+            <div class="flip-three-cards" id="flipThreeCards"></div>
+            <div class="flip-three-buttons">
+                <button class="confirm-btn" id="confirmFlipThree" disabled>Keep Selected Card</button>
+                <button class="cancel-btn" id="cancelFlipThree">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class CardDeckApp {
+            constructor() {
+                this.initializeDeck();
+                this.drawnCards = [];
+                this.currentRound = [];
+                this.history = [];
+                this.flipThreeCards = [];
+                this.selectedFlipThreeCard = null;
+                this.isFlipThreeActive = false;
+                this.initializeEventListeners();
+                this.updateDisplay();
+            }
+
+            initializeDeck() {
+                this.deck = [];
+                
+                // Number cards: 12 twelves, 11 elevens, etc., down to 1 one, plus one 0
+                for (let num = 12; num >= 1; num--) {
+                    for (let i = 0; i < num; i++) {
+                        this.deck.push({ type: 'number', value: num, id: `${num}_${i}` });
+                    }
+                }
+                this.deck.push({ type: 'number', value: 0, id: '0_0' });
+
+                // Action cards: 3 each of "Flip Three", "Freeze", "Second Chance"
+                const actionCards = ['flip_three', 'freeze', 'second_chance'];
+                actionCards.forEach(action => {
+                    for (let i = 0; i < 3; i++) {
+                        this.deck.push({ type: 'action', value: action, id: `${action}_${i}` });
+                    }
+                });
+
+                // Modifier cards: +2, +4, +6, +8, +10, X2
+                const modifiers = [2, 4, 6, 8, 10, 'x2'];
+                modifiers.forEach(mod => {
+                    const prefix = mod === 'x2' ? 'multiplier' : 'plus';
+                    this.deck.push({ type: 'modifier', value: mod, id: `${prefix}_${mod}` });
+                });
+
+                this.shuffleDeck();
+            }
+
+            shuffleDeck() {
+                for (let i = this.deck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
+                }
+            }
+
+            saveState() {
+                this.history.push({
+                    deck: [...this.deck],
+                    drawnCards: [...this.drawnCards],
+                    currentRound: [...this.currentRound]
+                });
+            }
+
+            drawCard() {
+                if (this.deck.length === 0) {
+                    // Shuffle drawn cards back into deck
+                    this.deck = [...this.drawnCards];
+                    this.drawnCards = [];
+                    this.shuffleDeck();
+                    if (this.deck.length === 0) return null;
+                }
+
+                // Limit to 7 cards per round
+                if (this.currentRound.length >= 7) {
+                    return null;
+                }
+
+                this.saveState();
+                const card = this.deck.pop();
+                
+                // Check if this is a "Flip Three" action card
+                if (card.type === 'action' && card.value === 'flip_three') {
+                    this.handleFlipThree(card);
+                } else {
+                    this.currentRound.push(card);
+                }
+                
+                this.updateDisplay();
+                return card;
+            }
+
+            handleFlipThree(flipThreeCard) {
+                // First, move the Flip Three card to drawn pile
+                this.drawnCards.push(flipThreeCard);
+                
+                // Draw 3 additional cards if possible
+                const cardsToShow = [];
+                for (let i = 0; i < 3; i++) {
+                    if (this.deck.length === 0) {
+                        // If we run out of cards, shuffle drawn cards back (excluding the flip three we just added)
+                        const flipThreeTemp = this.drawnCards.pop(); // Remove flip three temporarily
+                        if (this.drawnCards.length > 0) {
+                            this.deck = [...this.drawnCards];
+                            this.drawnCards = [flipThreeTemp]; // Put flip three back
+                            this.shuffleDeck();
+                        } else {
+                            this.drawnCards.push(flipThreeTemp); // Put flip three back
+                        }
+                    }
+                    
+                    if (this.deck.length > 0) {
+                        cardsToShow.push(this.deck.pop());
+                    }
+                }
+                
+                if (cardsToShow.length > 0) {
+                    this.showFlipThreeSelection(cardsToShow);
+                } else {
+                    // No cards available, just continue
+                    alert('No more cards available for Flip Three!');
+                }
+            }
+
+            showFlipThreeSelection(cards) {
+                this.flipThreeCards = cards;
+                this.selectedFlipThreeCard = null;
+                this.isFlipThreeActive = true;
+                
+                const overlay = document.getElementById('flipThreeOverlay');
+                const cardsContainer = document.getElementById('flipThreeCards');
+                
+                // Clear previous cards
+                cardsContainer.innerHTML = '';
+                
+                // Create card elements
+                cards.forEach((card, index) => {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'flip-three-card';
+                    cardDiv.dataset.cardIndex = index;
+                    
+                    const img = document.createElement('img');
+                    img.src = this.getCardImageSrc(card);
+                    img.alt = this.getCardDisplayName(card);
+                    
+                    // Fallback if image doesn't load
+                    img.onerror = () => {
+                        const fallback = document.createElement('div');
+                        fallback.className = 'flip-three-card-fallback';
+                        fallback.textContent = this.getCardDisplayName(card);
+                        cardDiv.replaceChild(fallback, img);
+                    };
+                    
+                    cardDiv.appendChild(img);
+                    
+                    // Add click handler
+                    cardDiv.addEventListener('click', () => {
+                        this.selectFlipThreeCard(index);
+                    });
+                    
+                    cardsContainer.appendChild(cardDiv);
+                });
+                
+                // Show the modal
+                overlay.style.display = 'flex';
+                
+                // Disable main game controls
+                this.updateDisplay();
+            }
+
+            selectFlipThreeCard(index) {
+                // Remove previous selection
+                const allCards = document.querySelectorAll('.flip-three-card');
+                allCards.forEach(card => card.classList.remove('selected'));
+                
+                // Select new card
+                allCards[index].classList.add('selected');
+                this.selectedFlipThreeCard = index;
+                
+                // Enable confirm button
+                document.getElementById('confirmFlipThree').disabled = false;
+            }
+
+            confirmFlipThreeSelection() {
+                if (this.selectedFlipThreeCard === null) return;
+                
+                const selectedCard = this.flipThreeCards[this.selectedFlipThreeCard];
+                const unselectedCards = this.flipThreeCards.filter((_, index) => index !== this.selectedFlipThreeCard);
+                
+                // Add selected card to current round (if there's space)
+                if (this.currentRound.length < 7) {
+                    this.currentRound.push(selectedCard);
+                }
+                
+                // Add unselected cards to drawn pile
+                this.drawnCards.push(...unselectedCards);
+                
+                // If selected card couldn't be added to round, add it to drawn pile too
+                if (this.currentRound.length >= 7 && !this.currentRound.includes(selectedCard)) {
+                    this.drawnCards.push(selectedCard);
+                }
+                
+                // Clean up
+                this.closeFlipThreeModal();
+            }
+
+            cancelFlipThreeSelection() {
+                // Put all flip three cards back in the deck and shuffle
+                this.deck.push(...this.flipThreeCards);
+                this.shuffleDeck();
+                
+                // Clean up
+                this.closeFlipThreeModal();
+            }
+
+            closeFlipThreeModal() {
+                this.flipThreeCards = [];
+                this.selectedFlipThreeCard = null;
+                this.isFlipThreeActive = false;
+                
+                document.getElementById('flipThreeOverlay').style.display = 'none';
+                document.getElementById('confirmFlipThree').disabled = true;
+                
+                this.updateDisplay();
+            }
+
+            endRound() {
+                if (this.currentRound.length === 0 || this.isFlipThreeActive) return;
+                
+                this.saveState();
+                this.drawnCards.push(...this.currentRound);
+                this.currentRound = [];
+                this.updateDisplay();
+            }
+
+            undoAction() {
+                if (this.history.length === 0 || this.isFlipThreeActive) return;
+                
+                const previousState = this.history.pop();
+                this.deck = previousState.deck;
+                this.drawnCards = previousState.drawnCards;
+                this.currentRound = previousState.currentRound;
+                this.updateDisplay();
+            }
+
+            shuffleRemainingCards() {
+                if (this.isFlipThreeActive) return;
+                this.saveState();
+                this.shuffleDeck();
+                this.updateDisplay();
+            }
+
+            shuffleAllCards() {
+                if (this.isFlipThreeActive) return;
+                this.saveState();
+                this.deck.push(...this.drawnCards, ...this.currentRound);
+                this.drawnCards = [];
+                this.currentRound = [];
+                this.shuffleDeck();
+                this.updateDisplay();
+            }
+
+            getCardImageSrc(card) {
+                let filename = '';
+                if (card.type === 'number') {
+                    filename = `card_${card.value}.png`;
+                } else if (card.type === 'action') {
+                    filename = `card_${card.value}.png`;
+                } else if (card.type === 'modifier') {
+                    if (card.value === 'x2') {
+                        filename = 'card_multiplier_x2.png';
+                    } else {
+                        filename = `card_plus_${card.value}.png`;
+                    }
+                }
+                return `assets/${filename}`;
+            }
+
+            createCardElement(card, forRound = false) {
+                const cardDiv = document.createElement('div');
+                cardDiv.style.position = 'relative';
+                
+                const img = document.createElement('img');
+                img.src = this.getCardImageSrc(card);
+                img.alt = this.getCardDisplayName(card);
+                
+                if (forRound) {
+                    img.className = 'card-image-round';
+                } else {
+                    img.className = 'card-image';
+                }
+                
+                // Fallback if image doesn't load
+                img.onerror = () => {
+                    const fallback = document.createElement('div');
+                    if (forRound) {
+                        fallback.className = 'card-back-round';
+                    } else {
+                        fallback.className = 'card-back';
+                        fallback.style.background = 'linear-gradient(145deg, #fff, #f0f0f0)';
+                        fallback.style.color = '#333';
+                    }
+                    fallback.style.fontSize = '14px';
+                    fallback.style.fontWeight = 'bold';
+                    fallback.innerHTML = this.getCardDisplayName(card);
+                    cardDiv.replaceChild(fallback, img);
+                };
+                
+                cardDiv.appendChild(img);
+                return cardDiv;
+            }
+
+            getCardDisplayName(card) {
+                if (card.type === 'number') {
+                    return card.value.toString();
+                } else if (card.type === 'action') {
+                    switch(card.value) {
+                        case 'flip_three': return 'Flip Three';
+                        case 'freeze': return 'Freeze';
+                        case 'second_chance': return 'Second Chance';
+                    }
+                } else if (card.type === 'modifier') {
+                    if (card.value === 'x2') {
+                        return 'X2';
+                    } else {
+                        return `+${card.value}`;
+                    }
+                }
+                return card.value;
+            }
+
+            updateDisplay() {
+                document.getElementById('cardsInDeck').textContent = this.deck.length;
+                document.getElementById('drawnCount').textContent = this.drawnCards.length;
+
+                // Update deck pile visibility
+                const deckPile = document.getElementById('deckPile');
+                if (this.deck.length === 0) {
+                    deckPile.style.opacity = '0.3';
+                } else {
+                    deckPile.style.opacity = '1';
+                }
+
+                // Update current round display
+                const roundCardsContainer = document.getElementById('currentRoundCards');
+                roundCardsContainer.innerHTML = '';
+                this.currentRound.forEach(card => {
+                    roundCardsContainer.appendChild(this.createCardElement(card, true));
+                });
+
+                // Update button states - disable if flip three is active
+                const flipThreeActive = this.isFlipThreeActive;
+                document.getElementById('drawCard').disabled = flipThreeActive || this.currentRound.length >= 7 || this.deck.length === 0;
+                document.getElementById('endRound').disabled = flipThreeActive || this.currentRound.length === 0;
+                document.getElementById('undoAction').disabled = flipThreeActive || this.history.length === 0;
+                document.getElementById('shuffleRemaining').disabled = flipThreeActive;
+                document.getElementById('shuffleAll').disabled = flipThreeActive;
+            }
+
+            showDrawnCards() {
+                const overlay = document.getElementById('drawnOverlay');
+                const fannedCards = document.getElementById('fannedCards');
+                
+                fannedCards.innerHTML = '';
+                this.drawnCards.forEach(card => {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'fanned-card';
+                    
+                    const img = document.createElement('img');
+                    img.src = this.getCardImageSrc(card);
+                    img.alt = this.getCardDisplayName(card);
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'contain';
+                    img.style.borderRadius = '6px';
+                    
+                    // Fallback if image doesn't load
+                    img.onerror = () => {
+                        cardDiv.innerHTML = this.getCardDisplayName(card);
+                        cardDiv.style.fontSize = '14px';
+                        cardDiv.style.fontWeight = 'bold';
+                        cardDiv.style.color = '#333';
+                    };
+                    
+                    cardDiv.appendChild(img);
+                    fannedCards.appendChild(cardDiv);
+                });
+
+                overlay.style.display = 'flex';
+            }
+
+            exportGameState() {
+                const gameState = {
+                    deck: this.deck,
+                    drawnCards: this.drawnCards,
+                    currentRound: this.currentRound,
+                    history: this.history
+                };
+                
+                const gameStateText = document.getElementById('gameStateText');
+                gameStateText.value = JSON.stringify(gameState, null, 2);
+                gameStateText.classList.remove('hidden');
+                gameStateText.select();
+                document.execCommand('copy');
+                alert('Game state exported and copied to clipboard!');
+            }
+
+            importGameState(gameStateJson) {
+                try {
+                    const gameState = JSON.parse(gameStateJson);
+                    
+                    // Validate the game state structure
+                    if (!gameState.deck || !gameState.drawnCards || !gameState.currentRound) {
+                        throw new Error('Invalid game state format');
+                    }
+                    
+                    this.deck = gameState.deck;
+                    this.drawnCards = gameState.drawnCards;
+                    this.currentRound = gameState.currentRound;
+                    this.history = gameState.history || [];
+                    
+                    this.updateDisplay();
+                    alert('Game state imported successfully!');
+                } catch (error) {
+                    alert('Error importing game state: ' + error.message);
+                }
+            }
+
+            initializeEventListeners() {
+                document.getElementById('drawCard').addEventListener('click', () => {
+                    this.drawCard();
+                });
+
+                document.getElementById('endRound').addEventListener('click', () => {
+                    this.endRound();
+                });
+
+                document.getElementById('undoAction').addEventListener('click', () => {
+                    this.undoAction();
+                });
+
+                document.getElementById('shuffleRemaining').addEventListener('click', () => {
+                    this.shuffleRemainingCards();
+                });
+
+                document.getElementById('shuffleAll').addEventListener('click', () => {
+                    if (confirm('This will shuffle all cards back into the deck. Are you sure?')) {
+                        this.shuffleAllCards();
+                    }
+                });
+
+                document.getElementById('drawnPile').addEventListener('click', () => {
+                    if (this.drawnCards.length > 0) {
+                        this.showDrawnCards();
+                    }
+                });
+
+                document.getElementById('closeDrawn').addEventListener('click', () => {
+                    document.getElementById('drawnOverlay').style.display = 'none';
+                });
+
+                document.getElementById('drawnOverlay').addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('drawnOverlay')) {
+                        document.getElementById('drawnOverlay').style.display = 'none';
+                    }
+                });
+
+                document.getElementById('exportGame').addEventListener('click', () => {
+                    this.exportGameState();
+                });
+
+                document.getElementById('importGame').addEventListener('click', () => {
+                    const gameStateText = document.getElementById('gameStateText');
+                    const confirmBtn = document.getElementById('confirmImport');
+                    const cancelBtn = document.getElementById('cancelImport');
+                    
+                    gameStateText.classList.remove('hidden');
+                    confirmBtn.classList.remove('hidden');
+                    cancelBtn.classList.remove('hidden');
+                    gameStateText.focus();
+                });
+
+                document.getElementById('confirmImport').addEventListener('click', () => {
+                    const gameStateText = document.getElementById('gameStateText');
+                    this.importGameState(gameStateText.value);
+                    
+                    gameStateText.classList.add('hidden');
+                    document.getElementById('confirmImport').classList.add('hidden');
+                    document.getElementById('cancelImport').classList.add('hidden');
+                    gameStateText.value = '';
+                });
+
+                document.getElementById('cancelImport').addEventListener('click', () => {
+                    const gameStateText = document.getElementById('gameStateText');
+                    gameStateText.classList.add('hidden');
+                    document.getElementById('confirmImport').classList.add('hidden');
+                    document.getElementById('cancelImport').classList.add('hidden');
+                    gameStateText.value = '';
+                });
+
+                // Flip Three modal event listeners
+                document.getElementById('confirmFlipThree').addEventListener('click', () => {
+                    this.confirmFlipThreeSelection();
+                });
+
+                document.getElementById('cancelFlipThree').addEventListener('click', () => {
+                    this.cancelFlipThreeSelection();
+                });
+
+                // Close flip three modal when clicking overlay
+                document.getElementById('flipThreeOverlay').addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('flipThreeOverlay')) {
+                        this.cancelFlipThreeSelection();
+                    }
+                });
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            window.cardDeckApp = new CardDeckApp();
+        });
+    </script>
+</body>
+</html>
