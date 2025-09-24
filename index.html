@@ -735,16 +735,28 @@
             }
 
             drawCard() {
-                if (this.deck.length === 0) {
-                    // Shuffle drawn cards back into deck
-                    this.deck = [...this.drawnCards];
-                    this.drawnCards = [];
-                    this.shuffleDeck();
-                    if (this.deck.length === 0) return null;
+                // Check if frozen, busted, or at 7-card limit first
+                if (this.isFrozen || this.isBusted || this.currentRound.length >= 7) {
+                    return null;
                 }
 
-                // Check if frozen, busted, or at 7-card limit
-                if (this.isFrozen || this.isBusted || this.currentRound.length >= 7) {
+                // Handle empty deck
+                if (this.deck.length === 0) {
+                    // If we have drawn cards available, shuffle them back into deck
+                    if (this.drawnCards.length > 0) {
+                        this.deck = [...this.drawnCards];
+                        this.drawnCards = [];
+                        this.shuffleDeck();
+                        // Update display to reflect the new deck state
+                        this.updateDisplay();
+                    } else {
+                        // No more cards available anywhere
+                        return null;
+                    }
+                }
+
+                // At this point we should have cards in the deck
+                if (this.deck.length === 0) {
                     return null;
                 }
 
@@ -919,6 +931,7 @@
                             this.shuffleDeck();
                         } else {
                             this.drawnCards.push(flipThreeTemp); // Put flip three back
+                            break; // No more cards to draw
                         }
                     }
                     
@@ -1000,18 +1013,48 @@
                 const selectedCard = this.flipThreeCards[this.selectedFlipThreeCard];
                 const unselectedCards = this.flipThreeCards.filter((_, index) => index !== this.selectedFlipThreeCard);
                 
-                // Add selected card to current round (if there's space)
-                if (this.currentRound.length < 7) {
-                    this.currentRound.push(selectedCard);
+                // Handle the selected card based on its type
+                if (selectedCard.type === 'action') {
+                    if (selectedCard.value === 'flip_three') {
+                        // Another flip three - goes to drawn pile
+                        this.drawnCards.push(selectedCard);
+                    } else if (selectedCard.value === 'freeze') {
+                        // Freeze card - add to round and set frozen state
+                        if (this.currentRound.length < 7) {
+                            this.currentRound.push(selectedCard);
+                            this.isFrozen = true;
+                        } else {
+                            this.drawnCards.push(selectedCard);
+                        }
+                    } else if (selectedCard.value === 'second_chance') {
+                        // Second chance - goes to power cards area
+                        this.powerCards.push(selectedCard);
+                    } else {
+                        // Other action cards - add to current round if space
+                        if (this.currentRound.length < 7) {
+                            this.currentRound.push(selectedCard);
+                        } else {
+                            this.drawnCards.push(selectedCard);
+                        }
+                    }
+                } else if (selectedCard.type === 'modifier') {
+                    // Modifier cards go to power cards area
+                    this.powerCards.push(selectedCard);
+                } else {
+                    // Number cards - add to current round if space
+                    if (this.currentRound.length < 7) {
+                        this.currentRound.push(selectedCard);
+                        // Check for bust after adding the card
+                        if (selectedCard.type === 'number') {
+                            this.checkForBust(selectedCard);
+                        }
+                    } else {
+                        this.drawnCards.push(selectedCard);
+                    }
                 }
                 
                 // Add unselected cards to drawn pile
                 this.drawnCards.push(...unselectedCards);
-                
-                // If selected card couldn't be added to round, add it to drawn pile too
-                if (this.currentRound.length >= 7 && !this.currentRound.includes(selectedCard)) {
-                    this.drawnCards.push(selectedCard);
-                }
                 
                 // Clean up
                 this.closeFlipThreeModal();
@@ -1179,7 +1222,8 @@
 
                 // Update deck pile visibility
                 const deckPile = document.getElementById('deckPile');
-                if (this.deck.length === 0) {
+                const totalAvailableCards = this.deck.length + this.drawnCards.length;
+                if (totalAvailableCards === 0) {
                     deckPile.style.opacity = '0.3';
                 } else {
                     deckPile.style.opacity = '1';
@@ -1270,7 +1314,8 @@
 
                 // Update button states - disable if flip three is active, frozen, busted, or at card limit
                 const flipThreeActive = this.isFlipThreeActive;
-                const cannotDraw = flipThreeActive || this.isFrozen || this.isBusted || this.currentRound.length >= 7 || this.deck.length === 0;
+                const hasAvailableCards = this.deck.length > 0 || this.drawnCards.length > 0;
+                const cannotDraw = flipThreeActive || this.isFrozen || this.isBusted || this.currentRound.length >= 7 || !hasAvailableCards;
                 
                 document.getElementById('drawCard').disabled = cannotDraw;
                 document.getElementById('endRound').disabled = flipThreeActive || this.currentRound.length === 0;
