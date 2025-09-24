@@ -139,6 +139,54 @@
             min-height: 250px;
         }
 
+        .second-chance-area {
+            background: rgba(255,215,0,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            min-height: 120px;
+            border: 2px solid rgba(255,215,0,0.3);
+        }
+
+        .second-chance-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: #FFD700;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .second-chance-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            min-height: 60px;
+            align-items: center;
+        }
+
+        .second-chance-card {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .second-chance-card:hover {
+            transform: scale(1.05);
+        }
+
+        .second-chance-card.clickable {
+            cursor: pointer;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+        }
+
         .round-title {
             font-size: 24px;
             margin-bottom: 20px;
@@ -493,6 +541,16 @@
                 width: 100%;
                 margin: 5px 0;
             }
+
+            .second-chance-area {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .second-chance-cards {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
@@ -506,6 +564,13 @@
             <button id="undoAction" disabled>Undo</button>
             <button id="shuffleRemaining">Shuffle Remaining</button>
             <button id="shuffleAll" class="danger-btn">Shuffle All Back</button>
+        </div>
+
+        <div class="second-chance-area">
+            <div class="second-chance-title">Second Chance Cards</div>
+            <div class="second-chance-cards" id="secondChanceCards">
+                <div style="color: rgba(255,255,255,0.5); font-style: italic;">No Second Chance cards available</div>
+            </div>
         </div>
 
         <div class="current-round">
@@ -569,6 +634,7 @@
                 this.initializeDeck();
                 this.drawnCards = [];
                 this.currentRound = [];
+                this.secondChanceCards = []; // Cards sitting outside round area
                 this.history = [];
                 this.flipThreeCards = [];
                 this.selectedFlipThreeCard = null;
@@ -620,6 +686,7 @@
                     deck: [...this.deck],
                     drawnCards: [...this.drawnCards],
                     currentRound: [...this.currentRound],
+                    secondChanceCards: [...this.secondChanceCards],
                     isFrozen: this.isFrozen,
                     isBusted: this.isBusted
                 });
@@ -648,6 +715,8 @@
                         this.handleFlipThree(card);
                     } else if (card.value === 'freeze') {
                         this.handleFreeze(card);
+                    } else if (card.value === 'second_chance') {
+                        this.handleSecondChance(card);
                     } else {
                         // Other action cards just go to current round
                         this.currentRound.push(card);
@@ -664,6 +733,61 @@
                 
                 this.updateDisplay();
                 return card;
+            }
+
+            handleSecondChance(secondChanceCard) {
+                // Add second chance card to separate area
+                this.secondChanceCards.push(secondChanceCard);
+            }
+
+            useSecondChance(secondChanceIndex) {
+                if (!this.isBusted || secondChanceIndex >= this.secondChanceCards.length) {
+                    return false;
+                }
+
+                // Save state before using second chance
+                this.saveState();
+
+                // Remove the second chance card and move it to drawn pile
+                const usedSecondChance = this.secondChanceCards.splice(secondChanceIndex, 1)[0];
+                this.drawnCards.push(usedSecondChance);
+
+                // Find and remove the bust-causing duplicate card
+                this.removeBustCard();
+
+                // Clear bust state
+                this.isBusted = false;
+
+                this.updateDisplay();
+                return true;
+            }
+
+            removeBustCard() {
+                // Find duplicate number cards
+                const numberCards = this.currentRound.filter(card => card.type === 'number');
+                const cardCounts = {};
+                
+                // Count occurrences of each number
+                numberCards.forEach(card => {
+                    if (cardCounts[card.value]) {
+                        cardCounts[card.value].push(card);
+                    } else {
+                        cardCounts[card.value] = [card];
+                    }
+                });
+
+                // Find the first duplicate and remove the most recent one
+                for (const value in cardCounts) {
+                    if (cardCounts[value].length > 1) {
+                        const duplicateCard = cardCounts[value][cardCounts[value].length - 1];
+                        const cardIndex = this.currentRound.findIndex(card => card.id === duplicateCard.id);
+                        if (cardIndex !== -1) {
+                            const removedCard = this.currentRound.splice(cardIndex, 1)[0];
+                            this.drawnCards.push(removedCard);
+                            break; // Only remove one card
+                        }
+                    }
+                }
             }
 
             checkForBust(newCard) {
@@ -824,7 +948,9 @@
                 
                 this.saveState();
                 this.drawnCards.push(...this.currentRound);
+                this.drawnCards.push(...this.secondChanceCards); // Move second chance cards to drawn pile
                 this.currentRound = [];
+                this.secondChanceCards = [];
                 this.isFrozen = false; // Unfreeze when ending round
                 this.isBusted = false; // Unbust when ending round
                 this.updateDisplay();
@@ -837,6 +963,7 @@
                 this.deck = previousState.deck;
                 this.drawnCards = previousState.drawnCards;
                 this.currentRound = previousState.currentRound;
+                this.secondChanceCards = previousState.secondChanceCards || [];
                 this.isFrozen = previousState.isFrozen !== undefined ? previousState.isFrozen : false;
                 this.isBusted = previousState.isBusted !== undefined ? previousState.isBusted : false;
                 this.updateDisplay();
@@ -852,9 +979,10 @@
             shuffleAllCards() {
                 if (this.isFlipThreeActive) return;
                 this.saveState();
-                this.deck.push(...this.drawnCards, ...this.currentRound);
+                this.deck.push(...this.drawnCards, ...this.currentRound, ...this.secondChanceCards);
                 this.drawnCards = [];
                 this.currentRound = [];
+                this.secondChanceCards = [];
                 this.isFrozen = false; // Unfreeze when shuffling all
                 this.isBusted = false; // Unbust when shuffling all
                 this.shuffleDeck();
@@ -942,6 +1070,36 @@
                     deckPile.style.opacity = '1';
                 }
 
+                // Update second chance cards display
+                const secondChanceContainer = document.getElementById('secondChanceCards');
+                secondChanceContainer.innerHTML = '';
+                
+                if (this.secondChanceCards.length === 0) {
+                    const placeholder = document.createElement('div');
+                    placeholder.style.color = 'rgba(255,255,255,0.5)';
+                    placeholder.style.fontStyle = 'italic';
+                    placeholder.textContent = 'No Second Chance cards available';
+                    secondChanceContainer.appendChild(placeholder);
+                } else {
+                    this.secondChanceCards.forEach((card, index) => {
+                        const cardElement = this.createCardElement(card, false);
+                        cardElement.className = 'second-chance-card';
+                        
+                        // Make clickable if busted
+                        if (this.isBusted) {
+                            cardElement.classList.add('clickable');
+                            cardElement.title = 'Click to remove a duplicate card and continue';
+                            cardElement.addEventListener('click', () => {
+                                this.useSecondChance(index);
+                            });
+                        } else {
+                            cardElement.title = 'Can only use when busted';
+                        }
+                        
+                        secondChanceContainer.appendChild(cardElement);
+                    });
+                }
+
                 // Update round title with freeze/bust indicators
                 const roundTitle = document.getElementById('roundTitle');
                 let titleText = 'Current Round';
@@ -1017,6 +1175,7 @@
                     deck: this.deck,
                     drawnCards: this.drawnCards,
                     currentRound: this.currentRound,
+                    secondChanceCards: this.secondChanceCards,
                     history: this.history,
                     isFrozen: this.isFrozen,
                     isBusted: this.isBusted
@@ -1042,6 +1201,7 @@
                     this.deck = gameState.deck;
                     this.drawnCards = gameState.drawnCards;
                     this.currentRound = gameState.currentRound;
+                    this.secondChanceCards = gameState.secondChanceCards || [];
                     this.history = gameState.history || [];
                     this.isFrozen = gameState.isFrozen || false;
                     this.isBusted = gameState.isBusted || false;
