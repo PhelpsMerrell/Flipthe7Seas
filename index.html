@@ -45,7 +45,7 @@
             grid-area: sidebar;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
         }
 
         .content-area {
@@ -120,47 +120,82 @@
         .deck-area {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
             align-items: center;
         }
 
-        .deck-pile, .drawn-pile {
+        .deck-pile {
             text-align: center;
         }
 
-        .pile-title {
-            font-size: 14px;
-            margin-bottom: 8px;
+        .deck-pile .pile-title {
+            font-size: 16px;
+            margin-bottom: 10px;
             font-weight: bold;
         }
 
-        .card-back {
-            width: 80px;
-            height: 120px;
+        .deck-pile .card-back {
+            width: 140px;
+            height: 210px;
             background: linear-gradient(145deg, #2c3e50, #34495e);
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
             color: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
             transition: transform 0.3s;
-            border: 2px solid #fff;
+            border: 3px solid #fff;
         }
 
-        .card-back:hover {
-            transform: scale(1.05);
+        .deck-pile .card-back:hover {
+            transform: scale(1.03);
         }
 
-        .card-image {
-            width: 80px;
-            height: 120px;
+        .deck-pile .card-image {
+            width: 140px;
+            height: 210px;
+            border-radius: 10px;
+            border: 3px solid #fff;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .drawn-pile {
+            width: 100%;
+        }
+
+        .drawn-button {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
             border-radius: 8px;
-            border: 2px solid #fff;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            padding: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .drawn-button:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+        }
+
+        .drawn-button .drawn-title {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .drawn-button .drawn-count {
+            font-size: 18px;
+            color: #64B5F6;
         }
 
         .current-round, .parallel-round {
@@ -842,9 +877,9 @@
                     </div>
                 </div>
                 <div class="drawn-pile">
-                    <div class="pile-title">Drawn</div>
-                    <div class="card-back" id="drawnPile" style="cursor: pointer;">
-                        <div>DRAWN<br><span id="drawnCount">0</span></div>
+                    <div class="drawn-button" id="drawnPile">
+                        <div class="drawn-title">Drawn Cards</div>
+                        <div class="drawn-count" id="drawnCount">0</div>
                     </div>
                 </div>
             </div>
