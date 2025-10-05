@@ -116,35 +116,76 @@
             margin-bottom: 15px;
         }
         
-        .values-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
+        .values-carousel {
+            position: relative;
             margin-top: 30px;
+            padding: 0 60px;
+        }
+        
+        .values-container {
+            overflow: hidden;
+        }
+        
+        .values-track {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
         }
         
         .value-card {
+            min-width: 100%;
             background: rgba(159, 122, 234, 0.1);
-            padding: 25px;
+            padding: 40px;
             border-radius: 8px;
             border-left: 4px solid #9f7aea;
-            transition: all 0.3s;
-        }
-        
-        .value-card:hover {
-            background: rgba(159, 122, 234, 0.2);
-            transform: translateX(5px);
+            text-align: center;
         }
         
         .value-card h3 {
             color: #68d391;
-            margin-bottom: 10px;
-            font-size: 1.3em;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .value-card p {
+            font-size: 1.1em;
+            color: #cbd5e0;
         }
         
         .value-icon {
-            font-size: 2.5em;
-            margin-bottom: 15px;
+            font-size: 3.5em;
+            margin-bottom: 20px;
+        }
+        
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(159, 122, 234, 0.3);
+            border: 2px solid #9f7aea;
+            color: #9f7aea;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        
+        .carousel-btn:hover {
+            background: rgba(159, 122, 234, 0.5);
+            transform: translateY(-50%) scale(1.1);
+        }
+        
+        .carousel-btn.prev {
+            left: 0;
+        }
+        
+        .carousel-btn.next {
+            right: 0;
         }
         
         .cta-section {
@@ -214,6 +255,16 @@
             .section h2 {
                 font-size: 2em;
             }
+            
+            .values-carousel {
+                padding: 0 50px;
+            }
+            
+            .carousel-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 1.2em;
+            }
         }
     </style>
 </head>
@@ -240,30 +291,36 @@
         
         <div class="section">
             <h2>Our Values</h2>
-            <div class="values-grid">
-                <div class="value-card">
-                    <div class="value-icon">🌱</div>
-                    <h3>Environmental Stewardship</h3>
-                    <p>We recycle 100% of our research materials and maintain a zero-waste policy across all facilities. Our sustainable practices ensure we give back more to the environment than we take.</p>
+            <div class="values-carousel">
+                <button class="carousel-btn prev" onclick="moveCarousel(-1)">‹</button>
+                <div class="values-container">
+                    <div class="values-track" id="valuesTrack">
+                        <div class="value-card">
+                            <div class="value-icon">🌱</div>
+                            <h3>Environmental Stewardship</h3>
+                            <p>We recycle 100% of our research materials and maintain a zero-waste policy across all facilities. Our sustainable practices ensure we give back more to the environment than we take.</p>
+                        </div>
+                        
+                        <div class="value-card">
+                            <div class="value-icon">🛡️</div>
+                            <h3>Worker Safety First</h3>
+                            <p>The safety and well-being of our employees is our top priority. We maintain the highest safety standards and provide comprehensive training for all personnel.</p>
+                        </div>
+                        
+                        <div class="value-card">
+                            <div class="value-icon">🤝</div>
+                            <h3>Community Care</h3>
+                            <p>We are deeply invested in the communities we serve, providing education, resources, and support to create a better tomorrow for all shroomples.</p>
+                        </div>
+                        
+                        <div class="value-card">
+                            <div class="value-icon">🔬</div>
+                            <h3>Ethical Innovation</h3>
+                            <p>Our cutting-edge research in sentience development is conducted with the highest ethical standards, always considering the implications of our discoveries.</p>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="value-card">
-                    <div class="value-icon">🛡️</div>
-                    <h3>Worker Safety First</h3>
-                    <p>The safety and well-being of our employees is our top priority. We maintain the highest safety standards and provide comprehensive training for all personnel.</p>
-                </div>
-                
-                <div class="value-card">
-                    <div class="value-icon">🤝</div>
-                    <h3>Community Care</h3>
-                    <p>We are deeply invested in the communities we serve, providing education, resources, and support to create a better tomorrow for all shroomples.</p>
-                </div>
-                
-                <div class="value-card">
-                    <div class="value-icon">🔬</div>
-                    <h3>Ethical Innovation</h3>
-                    <p>Our cutting-edge research in sentience development is conducted with the highest ethical standards, always considering the implications of our discoveries.</p>
-                </div>
+                <button class="carousel-btn next" onclick="moveCarousel(1)">›</button>
             </div>
         </div>
         
@@ -290,5 +347,45 @@
         <p style="margin-top: 10px; font-size: 0.9em;">Facilities located in Districts 1, 7, 12, and 19</p>
         <p style="margin-top: 10px; font-size: 0.85em; color: #718096;">MycoCorp is committed to equal opportunity employment and does not discriminate based on species, spore count, or mycelial network density.</p>
     </footer>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 4;
+        let autoRotateInterval;
+        let isAutoRotating = true;
+
+        function moveCarousel(direction) {
+            // Stop auto-rotation when user manually clicks
+            if (isAutoRotating) {
+                clearInterval(autoRotateInterval);
+                isAutoRotating = false;
+            }
+
+            currentSlide += direction;
+            
+            // Loop around
+            if (currentSlide < 0) {
+                currentSlide = totalSlides - 1;
+            } else if (currentSlide >= totalSlides) {
+                currentSlide = 0;
+            }
+            
+            updateCarousel();
+        }
+
+        function updateCarousel() {
+            const track = document.getElementById('valuesTrack');
+            const offset = -currentSlide * 100;
+            track.style.transform = `translateX(${offset}%)`;
+        }
+
+        function autoRotate() {
+            currentSlide = (currentSlide + 1) % totalSlides;
+            updateCarousel();
+        }
+
+        // Start auto-rotation (every 5 seconds)
+        autoRotateInterval = setInterval(autoRotate, 5000);
+    </script>
 </body>
 </html>
