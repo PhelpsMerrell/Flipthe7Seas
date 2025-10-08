@@ -103,38 +103,65 @@
         .radio-group {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            background: #f9f9f9;
-            padding: 15px;
-            border-radius: 8px;
+            gap: 15px;
         }
 
         .radio-option {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .radio-option:hover {
+            background: #fff;
+            border-color: #FFD700;
+            transform: translateX(5px);
         }
 
         .radio-option input[type="radio"] {
-            margin-top: 4px;
-            width: auto;
+            display: none;
         }
 
-        .radio-option label {
-            margin-bottom: 0;
-            font-weight: normal;
-            cursor: pointer;
+        .radio-option input[type="radio"]:checked + .option-content {
+            border-left: 5px solid #FFD700;
+            padding-left: 15px;
+        }
+
+        .radio-option.selected {
+            background: #FFF9E6;
+            border-color: #FFD700;
+        }
+
+        .option-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+
+        .option-emoji {
+            font-size: 36px;
+            line-height: 1;
+        }
+
+        .option-text {
+            flex: 1;
         }
 
         .option-title {
             font-weight: bold;
             color: #8B4513;
+            font-size: 18px;
+            margin-bottom: 5px;
         }
 
         .option-description {
             font-size: 14px;
             color: #666;
-            margin-top: 5px;
+            line-height: 1.5;
         }
 
         .info-box {
@@ -228,6 +255,10 @@
             .btn {
                 width: 100%;
             }
+
+            .option-emoji {
+                font-size: 28px;
+            }
         }
     </style>
 </head>
@@ -236,16 +267,16 @@
         <a href="../" class="back-link">← Back to Book Club</a>
 
         <header>
-            <h1>📖 Extension Request</h1>
-            <div class="subtitle">Need more time? We understand!</div>
+            <h1>😅 Extension Request</h1>
+            <div class="subtitle">We get it. Life happens. Books are long.</div>
         </header>
 
         <div class="content">
-            <h2>Request an Extension</h2>
+            <h2>Confess Your Reading Sins</h2>
 
             <div class="info-box">
-                <h4>Extension Options</h4>
-                <p>Choose the type of extension that works best for you. We want everyone to enjoy reading at their own pace!</p>
+                <h4>🤝 No Judgment Zone</h4>
+                <p>Seriously though, we've all been there. Pick the reason that best describes your current relationship with this book!</p>
             </div>
 
             <form id="extensionForm">
@@ -261,55 +292,104 @@
 
                 <div class="form-group">
                     <label for="bookTitle">Current Book *</label>
-                    <input type="text" id="bookTitle" name="bookTitle" value="The Great Gatsby" readonly>
+                    <input type="text" id="bookTitle" name="bookTitle" value="Lights Out" readonly>
                 </div>
 
                 <div class="form-group">
-                    <label>Extension Type *</label>
+                    <label>Why do you need an extension? (Be honest) *</label>
                     <div class="radio-group">
-                        <div class="radio-option">
-                            <input type="radio" id="moreTime" name="extensionType" value="more_time" required>
-                            <label for="moreTime">
-                                <div class="option-title">More Time to Read</div>
-                                <div class="option-description">
-                                    I need additional time to complete the reading, but I'll still attend the next meeting. 
-                                    The book club will continue on schedule for the next book.
+                        <label class="radio-option" onclick="selectOption(this, 'lazy')">
+                            <input type="radio" id="lazy" name="extensionType" value="lazy" required>
+                            <div class="option-content">
+                                <div class="option-emoji">😴</div>
+                                <div class="option-text">
+                                    <div class="option-title">I Am Lazy</div>
+                                    <div class="option-description">
+                                        Let's be real - the couch, Netflix, and snacks were just more appealing than reading. 
+                                        No shame. We've all been there. The book will be there tomorrow... probably.
+                                    </div>
                                 </div>
-                            </label>
-                        </div>
+                            </div>
+                        </label>
 
-                        <div class="radio-option">
-                            <input type="radio" id="pauseProgress" name="extensionType" value="pause_progress">
-                            <label for="pauseProgress">
-                                <div class="option-title">Pause My Progress</div>
-                                <div class="option-description">
-                                    I need to skip this meeting and pause my participation. I'll catch up later and won't 
-                                    be counted toward meeting attendance.
+                        <label class="radio-option" onclick="selectOption(this, 'week')">
+                            <input type="radio" id="week" name="extensionType" value="week">
+                            <div class="option-content">
+                                <div class="option-emoji">📅</div>
+                                <div class="option-text">
+                                    <div class="option-title">It's Been A Week</div>
+                                    <div class="option-description">
+                                        Work was insane. The kids were insane. Everything was insane. You looked at the book. 
+                                        The book looked at you. Neither of you made a move. That's just how it went.
+                                    </div>
                                 </div>
-                            </label>
-                        </div>
+                            </div>
+                        </label>
+
+                        <label class="radio-option" onclick="selectOption(this, 'busy')">
+                            <input type="radio" id="busy" name="extensionType" value="busy">
+                            <div class="option-content">
+                                <div class="option-emoji">🏃</div>
+                                <div class="option-text">
+                                    <div class="option-title">I Am Busy</div>
+                                    <div class="option-description">
+                                        Legitimately swamped with work, projects, side hustles, or pretending to adult. 
+                                        You want to read, you really do, but there are literally not enough hours in the day. 
+                                        Time is a flat circle and you're drowning in it.
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+
+                        <label class="radio-option" onclick="selectOption(this, 'life')">
+                            <input type="radio" id="life" name="extensionType" value="life">
+                            <div class="option-content">
+                                <div class="option-emoji">🎭</div>
+                                <div class="option-text">
+                                    <div class="option-title">Life Event</div>
+                                    <div class="option-description">
+                                        Something big happened - good, bad, or just big. Maybe someone got married. 
+                                        Maybe you moved. Maybe your cat learned to open doors and now you can't trust anything. 
+                                        Whatever it was, reading wasn't a priority.
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="requestedDate">When do you need until?</label>
+                    <label for="requestedDate">When do you think you'll actually finish? (Be realistic)</label>
                     <input type="date" id="requestedDate" name="requestedDate">
                 </div>
 
                 <div class="form-group">
-                    <label for="reason">Reason (Optional)</label>
-                    <textarea id="reason" name="reason" placeholder="Let us know why you need an extension (optional, but helps us plan better)"></textarea>
+                    <label for="reason">Additional Excuses/Details (Optional)</label>
+                    <textarea id="reason" name="reason" placeholder="Feel free to elaborate on your situation. Or just vent. We're here for it."></textarea>
                 </div>
 
                 <div class="buttons">
-                    <button type="submit" class="btn">Submit Extension Request</button>
-                    <a href="../" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn">Submit My Shame</button>
+                    <a href="../" class="btn btn-secondary">Cancel (Pretend This Never Happened)</a>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
+        function selectOption(element, value) {
+            // Remove selected class from all options
+            document.querySelectorAll('.radio-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked option
+            element.classList.add('selected');
+            
+            // Check the radio button
+            document.getElementById(value).checked = true;
+        }
+
         document.getElementById('extensionForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -324,41 +404,46 @@
                 submittedAt: new Date().toISOString()
             };
 
-            // Get extension type label
-            const extensionTypeLabel = document.querySelector('input[name="extensionType"]:checked').value === 'more_time' 
-                ? 'More Time to Read' 
-                : 'Pause My Progress';
+            // Get extension type labels
+            const extensionTypeLabels = {
+                'lazy': '😴 I Am Lazy',
+                'week': '📅 It\'s Been A Week',
+                'busy': '🏃 I Am Busy',
+                'life': '🎭 Life Event'
+            };
+
+            const extensionTypeLabel = extensionTypeLabels[formData.extensionType];
 
             // Create text content for download
-            let textContent = 'BOOK CLUB EXTENSION REQUEST\n';
-            textContent += '='.repeat(50) + '\n\n';
+            let textContent = '🙈 BOOK CLUB EXTENSION REQUEST 🙈\n';
+            textContent += '='.repeat(60) + '\n\n';
             textContent += `Name: ${formData.name}\n`;
             textContent += `Email: ${formData.email}\n`;
             textContent += `Book: ${formData.bookTitle}\n\n`;
-            textContent += `Extension Type: ${extensionTypeLabel}\n\n`;
+            textContent += `Reason: ${extensionTypeLabel}\n\n`;
             
-            if (formData.extensionType === 'more_time') {
-                textContent += 'Details:\n';
-                textContent += '- I need additional time to complete the reading\n';
-                textContent += '- I will still attend the next meeting\n';
-                textContent += '- Book club will continue on schedule for the next book\n\n';
-            } else {
-                textContent += 'Details:\n';
-                textContent += '- I need to skip this meeting\n';
-                textContent += '- I am pausing my participation\n';
-                textContent += '- I will not be counted toward meeting attendance\n\n';
-            }
+            // Add funny commentary based on reason
+            const commentary = {
+                'lazy': 'Translation: The couch won this round. Better luck next time, book!',
+                'week': 'Translation: Life happened. Books don\'t stand a chance against chaos.',
+                'busy': 'Translation: Responsible adult things took priority. Shocking.',
+                'life': 'Translation: Something actually important happened. This is valid.'
+            };
+            
+            textContent += `${commentary[formData.extensionType]}\n\n`;
             
             if (formData.requestedDate) {
-                textContent += `Extension Until: ${formData.requestedDate}\n\n`;
+                textContent += `Promises to finish by: ${formData.requestedDate}\n`;
+                textContent += '(We\'ll see about that...)\n\n';
             }
             
             if (formData.reason) {
-                textContent += `Reason:\n${formData.reason}\n\n`;
+                textContent += `Additional Excuses:\n${formData.reason}\n\n`;
             }
             
             textContent += `Submitted: ${new Date(formData.submittedAt).toLocaleString()}\n`;
-            textContent += '='.repeat(50) + '\n';
+            textContent += '='.repeat(60) + '\n';
+            textContent += '\nNo judgment. We\'ve all been there. Happy reading! 📚';
 
             // Create and trigger download
             const blob = new Blob([textContent], { type: 'text/plain' });
@@ -371,10 +456,17 @@
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
 
-            // Show confirmation
-            alert('Extension request submitted! A copy has been downloaded to your computer. We will review your request and get back to you soon.');
+            // Show funny confirmation
+            const confirmations = {
+                'lazy': 'Extension approved! Now go take that nap you clearly need. 😴',
+                'week': 'Extension approved! We hope next week is better. Or at least less chaotic. 📅',
+                'busy': 'Extension approved! Try to schedule "reading" between "adulting" sessions. 🏃',
+                'life': 'Extension approved! Take care of yourself first. The book will wait. 🎭'
+            };
+            
+            alert(confirmations[formData.extensionType] + '\n\nA copy has been downloaded to your computer.');
 
-            // Optional: Redirect back to main page after a delay
+            // Redirect back to main page after a delay
             setTimeout(() => {
                 window.location.href = '../';
             }, 2000);
