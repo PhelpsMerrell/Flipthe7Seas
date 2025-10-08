@@ -13,31 +13,99 @@
 
         body {
             font-family: 'Georgia', serif;
-            background: linear-gradient(135deg, #93E9BE, #7FCAA8);
+            background: linear-gradient(135deg, #E6E6FA, #DDA0DD, #B19CD9);
             min-height: 100vh;
             padding: 20px;
-            color: #f5f5dc;
+            color: #2C1A4D;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            width: 150px;
+            height: 100vh;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        body::before {
+            left: 0;
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 600"%3E%3Cdefs%3E%3ClinearGradient id="woodGrad1" x1="0%25" y1="0%25" x2="100%25" y2="100%25"%3E%3Cstop offset="0%25" style="stop-color:%23654321" /%3E%3Cstop offset="50%25" style="stop-color:%238B4513" /%3E%3Cstop offset="100%25" style="stop-color:%235C3317" /%3E%3C/linearGradient%3E%3CradialGradient id="carving"%3E%3Cstop offset="0%25" style="stop-color:%234A2511" /%3E%3Cstop offset="100%25" style="stop-color:%23654321" /%3E%3C/radialGradient%3E%3C/defs%3E%3Cg%3E%3C!-- Base --%3E%3Cpath d="M 40 520 L 160 520 L 180 550 L 180 580 L 20 580 L 20 550 Z" fill="url(%23woodGrad1)" stroke="%234A2511" stroke-width="2"/%3E%3Crect x="35" y="515" width="130" height="8" fill="%234A2511" opacity="0.5"/%3E%3C!-- Main body --%3E%3Cpath d="M 50 100 L 150 100 L 170 520 L 30 520 Z" fill="url(%23woodGrad1)" stroke="%234A2511" stroke-width="2"/%3E%3C!-- Ornate top scrollwork --%3E%3Cpath d="M 50 100 Q 45 90 50 80 Q 60 70 70 75 Q 75 80 75 90 Q 75 100 70 105 Q 65 108 60 105 Z" fill="url(%23carving)" stroke="%234A2511" stroke-width="1.5"/%3E%3Ccircle cx="65" cy="90" r="8" fill="url(%23carving)" stroke="%234A2511" stroke-width="1"/%3E%3Cpath d="M 150 100 Q 155 90 150 80 Q 140 70 130 75 Q 125 80 125 90 Q 125 100 130 105 Q 135 108 140 105 Z" fill="url(%23carving)" stroke="%234A2511" stroke-width="1.5"/%3E%3Ccircle cx="135" cy="90" r="8" fill="url(%23carving)" stroke="%234A2511" stroke-width="1"/%3E%3C!-- Center carved flourish --%3E%3Cpath d="M 100 150 Q 90 160 85 175 Q 82 190 90 200 Q 100 210 110 200 Q 118 190 115 175 Q 112 160 100 150 Z" fill="url(%23carving)" stroke="%234A2511" stroke-width="1.5"/%3E%3Cellipse cx="100" cy="180" rx="12" ry="20" fill="url(%23carving)" stroke="%234A2511" stroke-width="1"/%3E%3C!-- Decorative curves --%3E%3Cpath d="M 60 200 Q 50 220 52 240 Q 55 260 65 270" stroke="%234A2511" stroke-width="3" fill="none" opacity="0.6"/%3E%3Cpath d="M 140 200 Q 150 220 148 240 Q 145 260 135 270" stroke="%234A2511" stroke-width="3" fill="none" opacity="0.6"/%3E%3C!-- Additional carved details --%3E%3Ccircle cx="70" cy="250" r="6" fill="url(%23carving)" stroke="%234A2511" stroke-width="1"/%3E%3Ccircle cx="130" cy="250" r="6" fill="url(%23carving)" stroke="%234A2511" stroke-width="1"/%3E%3Ccircle cx="100" cy="300" r="7" fill="url(%23carving)" stroke="%234A2511" stroke-width="1"/%3E%3C!-- Wood grain lines --%3E%3Cline x1="45" y1="150" x2="155" y2="500" stroke="%235C3317" stroke-width="1" opacity="0.3"/%3E%3Cline x1="55" y1="120" x2="165" y2="510" stroke="%235C3317" stroke-width="1" opacity="0.2"/%3E%3Cline x1="75" y1="140" x2="145" y2="490" stroke="%235C3317" stroke-width="0.5" opacity="0.4"/%3E%3C/g%3E%3C/svg%3E');
+        }
+
+        body::after {
+            right: 0;
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 600"%3E%3Cdefs%3E%3ClinearGradient id="woodGrad2" x1="0%25" y1="0%25" x2="100%25" y2="100%25"%3E%3Cstop offset="0%25" style="stop-color:%235C3317" /%3E%3Cstop offset="50%25" style="stop-color:%238B4513" /%3E%3Cstop offset="100%25" style="stop-color:%23654321" /%3E%3C/linearGradient%3E%3CradialGradient id="carving2"%3E%3Cstop offset="0%25" style="stop-color:%234A2511" /%3E%3Cstop offset="100%25" style="stop-color:%23654321" /%3E%3C/radialGradient%3E%3C/defs%3E%3Cg%3E%3C!-- Base --%3E%3Cpath d="M 40 520 L 160 520 L 180 550 L 180 580 L 20 580 L 20 550 Z" fill="url(%23woodGrad2)" stroke="%234A2511" stroke-width="2"/%3E%3Crect x="35" y="515" width="130" height="8" fill="%234A2511" opacity="0.5"/%3E%3C!-- Main body --%3E%3Cpath d="M 50 100 L 150 100 L 170 520 L 30 520 Z" fill="url(%23woodGrad2)" stroke="%234A2511" stroke-width="2"/%3E%3C!-- Ornate top scrollwork --%3E%3Cpath d="M 50 100 Q 45 90 50 80 Q 60 70 70 75 Q 75 80 75 90 Q 75 100 70 105 Q 65 108 60 105 Z" fill="url(%23carving2)" stroke="%234A2511" stroke-width="1.5"/%3E%3Ccircle cx="65" cy="90" r="8" fill="url(%23carving2)" stroke="%234A2511" stroke-width="1"/%3E%3Cpath d="M 150 100 Q 155 90 150 80 Q 140 70 130 75 Q 125 80 125 90 Q 125 100 130 105 Q 135 108 140 105 Z" fill="url(%23carving2)" stroke="%234A2511" stroke-width="1.5"/%3E%3Ccircle cx="135" cy="90" r="8" fill="url(%23carving2)" stroke="%234A2511" stroke-width="1"/%3E%3C!-- Center carved flourish --%3E%3Cpath d="M 100 150 Q 90 160 85 175 Q 82 190 90 200 Q 100 210 110 200 Q 118 190 115 175 Q 112 160 100 150 Z" fill="url(%23carving2)" stroke="%234A2511" stroke-width="1.5"/%3E%3Cellipse cx="100" cy="180" rx="12" ry="20" fill="url(%23carving2)" stroke="%234A2511" stroke-width="1"/%3E%3C!-- Decorative curves --%3E%3Cpath d="M 60 200 Q 50 220 52 240 Q 55 260 65 270" stroke="%234A2511" stroke-width="3" fill="none" opacity="0.6"/%3E%3Cpath d="M 140 200 Q 150 220 148 240 Q 145 260 135 270" stroke="%234A2511" stroke-width="3" fill="none" opacity="0.6"/%3E%3C!-- Additional carved details --%3E%3Ccircle cx="70" cy="250" r="6" fill="url(%23carving2)" stroke="%234A2511" stroke-width="1"/%3E%3Ccircle cx="130" cy="250" r="6" fill="url(%23carving2)" stroke="%234A2511" stroke-width="1"/%3E%3Ccircle cx="100" cy="300" r="7" fill="url(%23carving2)" stroke="%234A2511" stroke-width="1"/%3E%3C!-- Wood grain lines --%3E%3Cline x1="45" y1="150" x2="155" y2="500" stroke="%235C3317" stroke-width="1" opacity="0.3"/%3E%3Cline x1="55" y1="120" x2="165" y2="510" stroke="%235C3317" stroke-width="1" opacity="0.2"/%3E%3Cline x1="75" y1="140" x2="145" y2="490" stroke="%235C3317" stroke-width="0.5" opacity="0.4"/%3E%3C/g%3E%3C/svg%3E');
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
+            z-index: 2;
         }
 
         header {
             text-align: center;
             margin-bottom: 40px;
             padding: 30px;
-            background: rgba(139, 69, 19, 0.3);
-            border-radius: 15px;
+            background: linear-gradient(135deg, rgba(255, 182, 193, 0.6), rgba(255, 218, 224, 0.6));
+            border-radius: 25px;
             backdrop-filter: blur(10px);
+            border: 3px solid #FF69B4;
+            box-shadow: 0 8px 32px rgba(255, 105, 180, 0.3);
+            position: relative;
+            overflow: visible;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            left: -120px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 140px;
+            height: 160px;
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500"%3E%3Cdefs%3E%3ClinearGradient id="robeG" x1="0%25" y1="0%25" x2="0%25" y2="100%25"%3E%3Cstop offset="0%25" style="stop-color:%232C0F5C" /%3E%3Cstop offset="40%25" style="stop-color:%234B0082" /%3E%3Cstop offset="70%25" style="stop-color:%236A0DAD" /%3E%3Cstop offset="100%25" style="stop-color:%234B0082" /%3E%3C/linearGradient%3E%3ClinearGradient id="robeShade" x1="0%25" y1="0%25" x2="100%25" y2="0%25"%3E%3Cstop offset="0%25" style="stop-color:%232C0F5C" /%3E%3Cstop offset="50%25" style="stop-color:%234B0082" /%3E%3Cstop offset="100%25" style="stop-color:%232C0F5C" /%3E%3C/linearGradient%3E%3CradialGradient id="glow"%3E%3Cstop offset="0%25" style="stop-color:%23FFD700;stop-opacity:1" /%3E%3Cstop offset="30%25" style="stop-color:%23FFA500;stop-opacity:0.8" /%3E%3Cstop offset="100%25" style="stop-color:%23FF8C00;stop-opacity:0" /%3E%3C/radialGradient%3E%3ClinearGradient id="beardG" x1="0%25" y1="0%25" x2="0%25" y2="100%25"%3E%3Cstop offset="0%25" style="stop-color:%23FFFFFF" /%3E%3Cstop offset="60%25" style="stop-color:%23F0F0F0" /%3E%3Cstop offset="100%25" style="stop-color:%23E0E0E0" /%3E%3C/linearGradient%3E%3Cfilter id="wizShadow"%3E%3CfeGaussianBlur in="SourceAlpha" stdDeviation="4"/%3E%3CfeOffset dx="3" dy="4"/%3E%3CfeFlood flood-color="%23000" flood-opacity="0.5"/%3E%3CfeComposite in2="offsetblur" operator="in"/%3E%3CfeMerge%3E%3CfeMergeNode/%3E%3CfeMergeNode in="SourceGraphic"/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3C!-- Shadow base --%3E%3Cellipse cx="200" cy="480" rx="80" ry="15" fill="%23000" opacity="0.3"/%3E%3C!-- Robe body --%3E%3Cpath d="M 150 330 Q 140 370 135 420 Q 132 450 140 480 L 260 480 Q 268 450 265 420 Q 260 370 250 330 Z" fill="url(%23robeG)" stroke="%232C0F5C" stroke-width="3" filter="url(%23wizShadow)"/%3E%3C!-- Robe folds --%3E%3Cpath d="M 170 340 Q 168 380 166 420" stroke="%232C0F5C" stroke-width="2" fill="none" opacity="0.4"/%3E%3Cpath d="M 200 335 Q 198 375 197 420" stroke="%232C0F5C" stroke-width="2" fill="none" opacity="0.4"/%3E%3Cpath d="M 230 340 Q 232 380 234 420" stroke="%232C0F5C" stroke-width="2" fill="none" opacity="0.4"/%3E%3C!-- Sleeves --%3E%3Cpath d="M 150 280 Q 130 300 115 330 Q 110 345 118 358 L 145 340 Z" fill="url(%23robeShade)" stroke="%232C0F5C" stroke-width="2.5" filter="url(%23wizShadow)"/%3E%3Cpath d="M 250 280 Q 270 300 285 330 Q 290 345 282 358 L 255 340 Z" fill="url(%23robeShade)" stroke="%232C0F5C" stroke-width="2.5" filter="url(%23wizShadow)"/%3E%3C!-- Belt --%3E%3Crect x="155" y="325" width="90" height="12" rx="2" fill="%23654321" stroke="%233E2723" stroke-width="2"/%3E%3Crect x="192" y="327" width="16" height="8" rx="1" fill="%23B8860B" stroke="%23856404" stroke-width="1"/%3E%3C!-- Stars on robe (more realistic) --%3E%3Cpolygon points="170,360 172,368 180,368 174,373 176,381 170,376 164,381 166,373 160,368 168,368" fill="%23FFD700" stroke="%23B8860B" stroke-width="0.5" opacity="0.9"/%3E%3Cpolygon points="220,375 222,383 230,383 224,388 226,396 220,391 214,396 216,388 210,383 218,383" fill="%23FFD700" stroke="%23B8860B" stroke-width="0.5" opacity="0.9"/%3E%3Cpolygon points="195,400 197,408 205,408 199,413 201,421 195,416 189,421 191,413 185,408 193,408" fill="%23FFD700" stroke="%23B8860B" stroke-width="0.5" opacity="0.85"/%3E%3Ccircle cx="180" cy="390" r="2" fill="%23FFD700" opacity="0.7"/%3E%3Ccircle cx="210" cy="395" r="2" fill="%23FFD700" opacity="0.7"/%3E%3Ccircle cx="165" cy="410" r="1.5" fill="%23FFD700" opacity="0.6"/%3E%3Ccircle cx="225" cy="410" r="1.5" fill="%23FFD700" opacity="0.6"/%3E%3C!-- Torso --%3E%3Cellipse cx="200" cy="270" rx="35" ry="45" fill="url(%23robeG)" stroke="%232C0F5C" stroke-width="2.5"/%3E%3C!-- Neck --%3E%3Crect x="190" y="245" width="20" height="25" fill="%23FFE4C4" stroke="%23D2B48C" stroke-width="1.5"/%3E%3C!-- Head --%3E%3Cellipse cx="200" cy="220" rx="28" ry="35" fill="%23FFE4C4" stroke="%23D2B48C" stroke-width="2" filter="url(%23wizShadow)"/%3E%3C!-- Face details --%3E%3Cellipse cx="188" cy="215" rx="4" ry="5" fill="%234A4A4A"/%3E%3Cellipse cx="212" cy="215" rx="4" ry="5" fill="%234A4A4A"/%3E%3Ccircle cx="189" cy="213" r="1.5" fill="%23FFF" opacity="0.7"/%3E%3Ccircle cx="213" cy="213" r="1.5" fill="%23FFF" opacity="0.7"/%3E%3Cpath d="M 195 228 Q 200 232 205 228" stroke="%23C9A98D" stroke-width="1.5" fill="none"/%3E%3Cline x1="200" y1="223" x2="200" y2="228" stroke="%23C9A98D" stroke-width="1.5"/%3E%3C!-- Eyebrows --%3E%3Cpath d="M 180 205 Q 188 203 195 204" stroke="%23D0D0D0" stroke-width="2" fill="none" stroke-linecap="round"/%3E%3Cpath d="M 205 204 Q 212 203 220 205" stroke="%23D0D0D0" stroke-width="2" fill="none" stroke-linecap="round"/%3E%3C!-- Beard (more realistic) --%3E%3Cpath d="M 180 235 Q 185 255 185 275 Q 185 285 190 290" fill="url(%23beardG)" stroke="%23D0D0D0" stroke-width="1.5"/%3E%3Cpath d="M 220 235 Q 215 255 215 275 Q 215 285 210 290" fill="url(%23beardG)" stroke="%23D0D0D0" stroke-width="1.5"/%3E%3Cpath d="M 190 240 Q 200 260 210 240" fill="url(%23beardG)" stroke="%23D0D0D0" stroke-width="1.5"/%3E%3Cpath d="M 185 250 Q 200 275 215 250" fill="%23FFFFFF" stroke="%23E0E0E0" stroke-width="1.5"/%3E%3C!-- Beard texture --%3E%3Cpath d="M 188 250 Q 190 265 192 280" stroke="%23E0E0E0" stroke-width="1" fill="none" opacity="0.5"/%3E%3Cpath d="M 200 252 Q 200 267 200 282" stroke="%23E0E0E0" stroke-width="1" fill="none" opacity="0.5"/%3E%3Cpath d="M 212 250 Q 210 265 208 280" stroke="%23E0E0E0" stroke-width="1" fill="none" opacity="0.5"/%3E%3C!-- Wizard hat --%3E%3Cpath d="M 165 190 L 200 80 L 235 190 Z" fill="url(%23robeG)" stroke="%232C0F5C" stroke-width="3" filter="url(%23wizShadow)"/%3E%3Cellipse cx="200" cy="190" rx="38" ry="12" fill="%234B0082" stroke="%232C0F5C" stroke-width="2.5"/%3E%3C!-- Hat band detail --%3E%3Crect x="165" y="185" width="70" height="8" rx="1" fill="%23654321" opacity="0.8"/%3E%3Crect x="195" y="186" width="10" height="6" rx="1" fill="%23B8860B"/%3E%3C!-- Stars on hat --%3E%3Cpolygon points="200,120 202,128 210,128 204,133 206,141 200,136 194,141 196,133 190,128 198,128" fill="%23FFD700" stroke="%23B8860B" stroke-width="1"/%3E%3Ccircle cx="185" cy="150" r="2" fill="%23FFD700" opacity="0.8"/%3E%3Ccircle cx="215" cy="150" r="2" fill="%23FFD700" opacity="0.8"/%3E%3Ccircle cx="195" cy="140" r="1.5" fill="%23FFD700" opacity="0.7"/%3E%3Ccircle cx="205" cy="135" r="1.5" fill="%23FFD700" opacity="0.7"/%3E%3C!-- Magic staff --%3E%3Cpath d="M 285 330 L 320 140" stroke="%23654321" stroke-width="6" stroke-linecap="round" filter="url(%23wizShadow)"/%3E%3Cpath d="M 287 320 L 318 150" stroke="%238B4513" stroke-width="3" stroke-linecap="round"/%3E%3C!-- Staff orb --%3E%3Ccircle cx="320" cy="130" r="22" fill="url(%23glow)" opacity="0.9"/%3E%3Ccircle cx="320" cy="130" r="16" fill="%23FFD700" opacity="0.8" filter="url(%23wizShadow)"/%3E%3Cpolygon points="320,115 323,123 331,123 325,128 327,136 320,131 313,136 315,128 309,123 317,123" fill="%23FFF" opacity="0.9"/%3E%3C!-- Magic sparkles --%3E%3Ccircle cx="310" cy="120" r="3" fill="%23FFD700" opacity="0.7"%3E%3Canimate attributeName="opacity" values="0.7;1;0.7" dur="1.5s" repeatCount="indefinite"/%3E%3C/circle%3E%3Ccircle cx="330" cy="125" r="2.5" fill="%23FFA500" opacity="0.6"%3E%3Canimate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/%3E%3C/circle%3E%3Ccircle cx="315" cy="140" r="2" fill="%23FFD700" opacity="0.5"%3E%3Canimate attributeName="opacity" values="0.5;0.9;0.5" dur="1.8s" repeatCount="indefinite"/%3E%3C/circle%3E%3Ccircle cx="328" cy="118" r="2" fill="%23FFF" opacity="0.8"%3E%3Canimate attributeName="opacity" values="0.8;1;0.8" dur="1.3s" repeatCount="indefinite"/%3E%3C/circle%3E%3C!-- Hand --%3E%3Cellipse cx="280" cy="340" rx="8" ry="12" fill="%23FFE4C4" stroke="%23D2B48C" stroke-width="1.5" transform="rotate(-20 280 340)"/%3E%3C/svg%3E');
+            background-size: contain;
+            background-repeat: no-repeat;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 8px 16px rgba(75, 0, 130, 0.5));
+        }
+
+        header::after {
+            content: '';
+            position: absolute;
+            right: -120px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 140px;
+            height: 160px;
+            background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 500"%3E%3Cdefs%3E%3ClinearGradient id="uBody" x1="0%25" y1="0%25" x2="0%25" y2="100%25"%3E%3Cstop offset="0%25" style="stop-color:%23FFFFFF" /%3E%3Cstop offset="50%25" style="stop-color:%23FFF5F7" /%3E%3Cstop offset="100%25" style="stop-color:%23FFE4E8" /%3E%3C/linearGradient%3E%3ClinearGradient id="mane" x1="0%25" y1="0%25" x2="100%25" y2="100%25"%3E%3Cstop offset="0%25" style="stop-color:%23FF69B4" /%3E%3Cstop offset="25%25" style="stop-color:%23FF1493" /%3E%3Cstop offset="50%25" style="stop-color:%23DDA0DD" /%3E%3Cstop offset="75%25" style="stop-color:%2387CEEB" /%3E%3Cstop offset="100%25" style="stop-color:%2398FB98" /%3E%3C/linearGradient%3E%3ClinearGradient id="horn" x1="0%25" y1="0%25" x2="0%25" y2="100%25"%3E%3Cstop offset="0%25" style="stop-color:%23FFD700" /%3E%3Cstop offset="25%25" style="stop-color:%23FFF8DC" /%3E%3Cstop offset="50%25" style="stop-color:%23FFD700" /%3E%3Cstop offset="75%25" style="stop-color:%23FFA500" /%3E%3Cstop offset="100%25" style="stop-color:%23FFD700" /%3E%3C/linearGradient%3E%3CradialGradient id="hornGlow"%3E%3Cstop offset="0%25" style="stop-color:%23FFD700;stop-opacity:0.8" /%3E%3Cstop offset="100%25" style="stop-color:%23FFD700;stop-opacity:0" /%3E%3C/radialGradient%3E%3Cfilter id="uShadow"%3E%3CfeGaussianBlur in="SourceAlpha" stdDeviation="3"/%3E%3CfeOffset dx="2" dy="3"/%3E%3CfeFlood flood-color="%23000" flood-opacity="0.3"/%3E%3CfeComposite in2="offsetblur" operator="in"/%3E%3CfeMerge%3E%3CfeMergeNode/%3E%3CfeMergeNode in="SourceGraphic"/%3E%3C/feMerge%3E%3C/filter%3E%3C/defs%3E%3Cellipse cx="250" cy="475" rx="90" ry="18" fill="%23000" opacity="0.2"/%3E%3Cellipse cx="240" cy="350" rx="75" ry="60" fill="url(%23uBody)" stroke="%23FFB6C1" stroke-width="2.5" filter="url(%23uShadow)"/%3E%3Cellipse cx="235" cy="350" rx="50" ry="40" fill="%23FFF" opacity="0.6"/%3E%3Cpath d="M 200 330 Q 210 350 200 370" stroke="%23FFD4E0" stroke-width="1" fill="none" opacity="0.5"/%3E%3Cpath d="M 280 330 Q 270 350 280 370" stroke="%23FFD4E0" stroke-width="1" fill="none" opacity="0.5"/%3E%3Cpath d="M 200 380 L 195 450 L 193 465 Q 193 468 196 468 L 204 468 Q 207 468 207 465 L 210 450 L 215 380 Z" fill="url(%23uBody)" stroke="%23FFB6C1" stroke-width="2" filter="url(%23uShadow)"/%3E%3Cpath d="M 265 380 L 260 450 L 258 465 Q 258 468 261 468 L 269 468 Q 272 468 272 465 L 275 450 L 280 380 Z" fill="url(%23uBody)" stroke="%23FFB6C1" stroke-width="2" filter="url(%23uShadow)"/%3E%3Cellipse cx="200" cy="467" rx="8" ry="4" fill="%23FFD700" stroke="%23FFA500" stroke-width="1.5"/%3E%3Cellipse cx="265" cy="467" rx="8" ry="4" fill="%23FFD700" stroke="%23FFA500" stroke-width="1.5"/%3E%3Cline x1="200" y1="390" x2="200" y2="450" stroke="%23FFD4E0" stroke-width="0.5" opacity="0.4"/%3E%3Cline x1="265" y1="390" x2="265" y2="450" stroke="%23FFD4E0" stroke-width="0.5" opacity="0.4"/%3E%3Cellipse cx="290" cy="290" rx="35" ry="55" fill="url(%23uBody)" stroke="%23FFB6C1" stroke-width="2.5" transform="rotate(15 290 290)" filter="url(%23uShadow)"/%3E%3Cellipse cx="285" cy="285" rx="25" ry="40" fill="%23FFF" opacity="0.5" transform="rotate(15 285 285)"/%3E%3Cellipse cx="330" cy="230" rx="40" ry="48" fill="url(%23uBody)" stroke="%23FFB6C1" stroke-width="2.5" transform="rotate(10 330 230)" filter="url(%23uShadow)"/%3E%3Cellipse cx="328" cy="228" rx="30" ry="38" fill="%23FFF" opacity="0.6" transform="rotate(10 328 228)"/%3E%3Cellipse cx="365" cy="245" rx="20" ry="18" fill="%23FFF5F7" stroke="%23FFB6C1" stroke-width="2"/%3E%3Cellipse cx="363" cy="243" rx="14" ry="12" fill="%23FFF" opacity="0.7"/%3E%3Cellipse cx="370" cy="248" rx="3" ry="4" fill="%23FFB6C1"/%3E%3Cpath d="M 360 255 Q 365 258 370 255" stroke="%23FFB6C1" stroke-width="1.5" fill="none" stroke-linecap="round"/%3E%3Ccircle cx="335" cy="180" r="15" fill="url(%23hornGlow)" opacity="0.6"/%3E%3Cpath d="M 330 185 L 335 130 L 340 185 Z" fill="url(%23horn)" stroke="%23FFA500" stroke-width="2" filter="url(%23uShadow)"/%3E%3Cline x1="332" y1="180" x2="337" y2="180" stroke="%23FFA500" stroke-width="1" opacity="0.6"/%3E%3Cline x1="333" y1="170" x2="337" y2="170" stroke="%23FFA500" stroke-width="1" opacity="0.6"/%3E%3Cline x1="333" y1="160" x2="336.5" y2="160" stroke="%23FFA500" stroke-width="1" opacity="0.6"/%3E%3Cline x1="333.5" y1="150" x2="336" y2="150" stroke="%23FFA500" stroke-width="1" opacity="0.6"/%3E%3Cline x1="334" y1="140" x2="335.5" y2="140" stroke="%23FFA500" stroke-width="1" opacity="0.6"/%3E%3Ccircle cx="340" cy="225" rx="6" ry="7" fill="%234A4A4A"/%3E%3Ccircle cx="341" cy="223" r="2" fill="%23FFF" opacity="0.8"/%3E%3Cpath d="M 320 205 Q 322 200 328 198" stroke="%23FFB6C1" stroke-width="1.5" fill="none" stroke-linecap="round"/%3E%3Cellipse cx="315" cy="210" rx="10" ry="16" fill="%23FFF0F5" stroke="%23FFB6C1" stroke-width="1.5" transform="rotate(-25 315 210)"/%3E%3Cellipse cx="315" cy="210" rx="6" ry="10" fill="%23FFD4E0" opacity="0.4" transform="rotate(-25 315 210)"/%3E%3Cpath d="M 270 200 Q 260 210 258 225 Q 257 240 262 255 Q 268 270 275 280" stroke="url(%23mane)" stroke-width="14" fill="none" stroke-linecap="round" filter="url(%23uShadow)"/%3E%3Cpath d="M 275 205 Q 265 215 263 230 Q 262 245 267 258 Q 272 270 278 278" stroke="url(%23mane)" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.8"/%3E%3Cpath d="M 280 210 Q 272 218 270 230 Q 269 242 273 252" stroke="url(%23mane)" stroke-width="7" fill="none" stroke-linecap="round" opacity="0.6"/%3E%3Cpath d="M 170 340 Q 145 350 130 365 Q 120 380 125 398 Q 130 415 140 425" stroke="url(%23mane)" stroke-width="16" fill="none" stroke-linecap="round" filter="url(%23uShadow)"/%3E%3Cpath d="M 175 345 Q 152 355 138 368 Q 130 382 134 397 Q 138 410 146 418" stroke="url(%23mane)" stroke-width="12" fill="none" stroke-linecap="round" opacity="0.8"/%3E%3Cpath d="M 180 350 Q 160 358 150 368 Q 145 378 148 390" stroke="url(%23mane)" stroke-width="9" fill="none" stroke-linecap="round" opacity="0.6"/%3E%3Cpolygon points="335,118 338,127 347,127 340,133 343,142 335,136 327,142 330,133 323,127 332,127" fill="%23FFD700" opacity="0.9"%3E%3Canimate attributeName="opacity" values="0.9;1;0.9" dur="2s" repeatCount="indefinite"/%3E%3C/polygon%3E%3Ccircle cx="350" cy="135" r="3" fill="%23FF69B4" opacity="0.8"%3E%3Canimate attributeName="opacity" values="0.8;1;0.8" dur="1.8s" repeatCount="indefinite"/%3E%3C/circle%3E%3Ccircle cx="320" cy="125" r="2.5" fill="%2387CEEB" opacity="0.7"%3E%3Canimate attributeName="opacity" values="0.7;1;0.7" dur="2.2s" repeatCount="indefinite"/%3E%3C/circle%3E%3Ccircle cx="345" cy="120" r="2" fill="%23DDA0DD" opacity="0.8"%3E%3Canimate attributeName="opacity" values="0.8;1;0.8" dur="1.5s" repeatCount="indefinite"/%3E%3C/circle%3E%3Ccircle cx="328" cy="115" r="2" fill="%2398FB98" opacity="0.7"%3E%3Canimate attributeName="opacity" values="0.7;1;0.7" dur="1.9s" repeatCount="indefinite"/%3E%3C/circle%3E%3C/svg%3E');
+            background-size: contain;
+            background-repeat: no-repeat;
+            animation: float 3s ease-in-out infinite 1.5s;
+            filter: drop-shadow(0 8px 16px rgba(255, 105, 180, 0.5));
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(-50%) translateY(0); }
+            50% { transform: translateY(-50%) translateY(-15px); }
         }
 
         h1 {
             font-size: 48px;
-            color: #FFD700;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            color: #9370DB;
+            text-shadow: 3px 3px 6px rgba(255, 105, 180, 0.5), 0 0 20px rgba(147, 112, 219, 0.3);
             margin-bottom: 10px;
+            font-family: 'Brush Script MT', cursive, 'Georgia', serif;
         }
 
         .subtitle {
@@ -45,29 +113,30 @@
             font-style: italic;
             opacity: 0.9;
             margin-bottom: 20px;
+            color: #8B008B;
         }
 
         .header-btn {
-            background: linear-gradient(145deg, #FFD700, #FFA500);
-            border: none;
-            color: #8B4513;
+            background: linear-gradient(145deg, #FF69B4, #FFB6C1);
+            border: 2px solid #FF1493;
+            color: white;
             padding: 15px 35px;
             text-align: center;
             text-decoration: none;
             display: inline-block;
             font-size: 18px;
             cursor: pointer;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border-radius: 25px;
+            box-shadow: 0 4px 8px rgba(255, 20, 147, 0.3), 0 0 15px rgba(255, 105, 180, 0.4);
             transition: all 0.3s;
             font-weight: bold;
             margin-top: 15px;
         }
 
         .header-btn:hover {
-            background: linear-gradient(145deg, #FFA500, #FFD700);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            background: linear-gradient(145deg, #FFB6C1, #FF69B4);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 12px rgba(255, 20, 147, 0.4), 0 0 25px rgba(255, 105, 180, 0.6);
         }
 
         /* Tab Navigation */
@@ -80,29 +149,32 @@
         }
 
         .tab-button {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            color: white;
+            background: linear-gradient(135deg, rgba(255, 182, 193, 0.7), rgba(221, 160, 221, 0.7));
+            border: 2px solid #FF69B4;
+            color: #4B0082;
             padding: 15px 30px;
             font-size: 18px;
             cursor: pointer;
-            border-radius: 10px;
+            border-radius: 20px;
             backdrop-filter: blur(10px);
             transition: all 0.3s;
             font-family: 'Georgia', serif;
             font-weight: bold;
+            box-shadow: 0 4px 8px rgba(147, 112, 219, 0.2);
         }
 
         .tab-button:hover {
-            background: rgba(255, 215, 0, 0.3);
-            border-color: #FFD700;
-            transform: translateY(-2px);
+            background: linear-gradient(135deg, rgba(255, 105, 180, 0.8), rgba(186, 85, 211, 0.8));
+            border-color: #FF1493;
+            transform: translateY(-2px) rotate(2deg);
+            box-shadow: 0 6px 12px rgba(147, 112, 219, 0.4);
         }
 
         .tab-button.active {
-            background: #FFD700;
-            color: #8B4513;
-            border-color: #FFD700;
+            background: linear-gradient(135deg, #FF69B4, #BA55D3);
+            color: white;
+            border-color: #FF1493;
+            box-shadow: 0 0 20px rgba(255, 105, 180, 0.6), inset 0 0 10px rgba(255, 255, 255, 0.3);
         }
 
         /* Tab Content */
@@ -132,15 +204,24 @@
         }
 
         h2 {
-            color: #8B4513;
+            color: #8B008B;
             margin-bottom: 25px;
             padding-bottom: 10px;
-            border-bottom: 3px solid #FFD700;
+            border-bottom: 3px solid #FF69B4;
             font-size: 32px;
+            text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.3);
+        }
+
+        h2::before {
+            content: '✨ ';
+        }
+
+        h2::after {
+            content: ' ✨';
         }
 
         h3 {
-            color: #8B4513;
+            color: #9370DB;
             margin-top: 25px;
             margin-bottom: 15px;
             font-size: 24px;
@@ -148,17 +229,28 @@
 
         /* Upcoming Reads */
         .month-card {
-            background: linear-gradient(135deg, #FFE4B5, #FFDAB9);
+            background: linear-gradient(135deg, #FFE4E1, #FFF0F5);
             padding: 25px;
-            border-radius: 10px;
+            border-radius: 20px;
             margin-bottom: 25px;
-            border-left: 5px solid #FFD700;
+            border-left: 5px solid #FF69B4;
+            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.2);
+            position: relative;
+        }
+
+        .month-card::before {
+            content: '🌟';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 30px;
+            opacity: 0.6;
         }
 
         .month-title {
             font-size: 24px;
             font-weight: bold;
-            color: #8B4513;
+            color: #BA55D3;
             margin-bottom: 15px;
         }
 
@@ -172,7 +264,7 @@
         .book-title {
             font-size: 20px;
             font-weight: bold;
-            color: #8B4513;
+            color: #9370DB;
         }
 
         .book-author {
@@ -194,14 +286,15 @@
         }
 
         .tbr-item {
-            background: #f9f9f9;
+            background: linear-gradient(135deg, #FFF0F5, #FFE4E1);
             padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #FFD700;
+            border-radius: 15px;
+            border-left: 4px solid #FF69B4;
             display: grid;
             grid-template-columns: 1fr auto;
             gap: 15px;
             align-items: start;
+            box-shadow: 0 2px 8px rgba(255, 105, 180, 0.15);
         }
 
         .tbr-info {
@@ -211,7 +304,7 @@
         .tbr-title {
             font-size: 20px;
             font-weight: bold;
-            color: #8B4513;
+            color: #9370DB;
             margin-bottom: 5px;
         }
 
@@ -229,15 +322,16 @@
         .tbr-votes {
             text-align: center;
             padding: 10px;
-            background: rgba(255, 215, 0, 0.2);
-            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(255, 182, 193, 0.5), rgba(221, 160, 221, 0.5));
+            border-radius: 12px;
             min-width: 80px;
+            border: 2px solid #FFB6C1;
         }
 
         .vote-count {
             font-size: 28px;
             font-weight: bold;
-            color: #8B4513;
+            color: #FF1493;
         }
 
         .vote-label {
@@ -247,17 +341,27 @@
 
         /* Schedule */
         .current-book-header {
-            background: linear-gradient(135deg, #FFE4B5, #FFDAB9);
+            background: linear-gradient(135deg, #FFE4E1, #FFF0F5);
             padding: 25px;
-            border-radius: 10px;
+            border-radius: 20px;
             margin-bottom: 30px;
-            border-left: 5px solid #FFD700;
+            border-left: 5px solid #FF69B4;
+            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.2);
+            position: relative;
+        }
+
+        .current-book-header::before {
+            content: '🪄';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 35px;
         }
 
         .current-book-title {
             font-size: 28px;
             font-weight: bold;
-            color: #8B4513;
+            color: #9370DB;
             margin-bottom: 8px;
         }
 
@@ -273,35 +377,40 @@
         }
 
         .schedule-item {
-            background: white;
+            background: linear-gradient(135deg, #FFF, #FFF5FF);
             padding: 20px;
-            border-radius: 10px;
-            border-left: 5px solid #8B4513;
+            border-radius: 15px;
+            border-left: 5px solid #BA55D3;
             display: grid;
             grid-template-columns: auto 1fr;
             gap: 20px;
             align-items: center;
+            box-shadow: 0 2px 8px rgba(186, 85, 211, 0.15);
         }
 
         .schedule-date {
             text-align: center;
             padding: 15px;
-            background: #FFD700;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #FFB6C1, #DDA0DD);
+            border-radius: 12px;
             min-width: 120px;
+            border: 2px solid #FF69B4;
+            box-shadow: 0 4px 8px rgba(255, 105, 180, 0.3);
         }
 
         .date-day {
             font-size: 32px;
             font-weight: bold;
-            color: #8B4513;
+            color: white;
             line-height: 1;
+            text-shadow: 2px 2px 4px rgba(139, 0, 139, 0.5);
         }
 
         .date-month {
             font-size: 14px;
-            color: #8B4513;
+            color: white;
             margin-top: 5px;
+            font-weight: bold;
         }
 
         .schedule-details {
@@ -311,7 +420,7 @@
         .schedule-reading {
             font-size: 18px;
             font-weight: bold;
-            color: #8B4513;
+            color: #9370DB;
             margin-bottom: 5px;
         }
 
@@ -323,15 +432,16 @@
 
         /* Info Box */
         .info-box {
-            background: #E6F3FF;
-            border-left: 5px solid #4A90E2;
+            background: linear-gradient(135deg, #F0E6FF, #FFE6F0);
+            border-left: 5px solid #BA55D3;
             padding: 20px;
             margin-bottom: 25px;
-            border-radius: 8px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(186, 85, 211, 0.2);
         }
 
         .info-box h4 {
-            color: #4A90E2;
+            color: #9370DB;
             margin-bottom: 10px;
         }
 
@@ -342,8 +452,8 @@
 
         /* Buttons */
         .btn {
-            background: linear-gradient(145deg, #8B4513, #A0522D);
-            border: none;
+            background: linear-gradient(145deg, #FF69B4, #BA55D3);
+            border: 2px solid #FF1493;
             color: white;
             padding: 12px 25px;
             text-align: center;
@@ -351,26 +461,38 @@
             display: inline-block;
             font-size: 16px;
             cursor: pointer;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            box-shadow: 0 4px 8px rgba(255, 20, 147, 0.3), 0 0 15px rgba(255, 105, 180, 0.3);
             transition: all 0.3s;
             font-weight: bold;
             margin-top: 15px;
         }
 
         .btn:hover {
-            background: linear-gradient(145deg, #A0522D, #8B4513);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            background: linear-gradient(145deg, #BA55D3, #FF69B4);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 6px 12px rgba(255, 20, 147, 0.4), 0 0 25px rgba(255, 105, 180, 0.5);
         }
 
         footer {
             text-align: center;
             margin-top: 40px;
             padding: 20px;
-            background: rgba(139, 69, 19, 0.3);
-            border-radius: 10px;
+            background: linear-gradient(135deg, rgba(255, 182, 193, 0.6), rgba(221, 160, 221, 0.6));
+            border-radius: 20px;
             backdrop-filter: blur(10px);
+            border: 2px solid #FF69B4;
+            box-shadow: 0 4px 12px rgba(255, 105, 180, 0.3);
+        }
+
+        footer::before {
+            content: '⭐';
+            margin-right: 10px;
+        }
+
+        footer::after {
+            content: '⭐';
+            margin-left: 10px;
         }
 
         @media (max-width: 768px) {
