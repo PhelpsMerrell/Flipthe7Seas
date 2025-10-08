@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Extension - Book Club</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+            min-height: 100vh;
+            padding: 20px;
+            color: #f5f5dc;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(139, 69, 19, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 42px;
+            color: #FFD700;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            font-style: italic;
+            opacity: 0.9;
+        }
+
+        .content {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 40px;
+            color: #333;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: #8B4513;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #FFD700;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: 'Georgia', serif;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #FFD700;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .radio-option input[type="radio"] {
+            margin-top: 4px;
+            width: auto;
+        }
+
+        .radio-option label {
+            margin-bottom: 0;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        .option-title {
+            font-weight: bold;
+            color: #8B4513;
+        }
+
+        .option-description {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .info-box {
+            background: #FFF9E6;
+            border-left: 5px solid #FFD700;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 5px;
+        }
+
+        .info-box h4 {
+            color: #8B4513;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(145deg, #8B4513, #A0522D);
+            border: none;
+            color: white;
+            padding: 15px 35px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: linear-gradient(145deg, #A0522D, #8B4513);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(145deg, #666, #555);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(145deg, #555, #444);
+        }
+
+        .back-link {
+            display: inline-block;
+            color: #f5f5dc;
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .back-link:hover {
+            color: #FFD700;
+            transform: translateX(-5px);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 32px;
+            }
+
+            .content {
+                padding: 25px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../" class="back-link">← Back to Book Club</a>
+
+        <header>
+            <h1>📖 Extension Request</h1>
+            <div class="subtitle">Need more time? We understand!</div>
+        </header>
+
+        <div class="content">
+            <h2>Request an Extension</h2>
+
+            <div class="info-box">
+                <h4>Extension Options</h4>
+                <p>Choose the type of extension that works best for you. We want everyone to enjoy reading at their own pace!</p>
+            </div>
+
+            <form id="extensionForm">
+                <div class="form-group">
+                    <label for="name">Your Name *</label>
+                    <input type="text" id="name" name="name" required placeholder="Enter your full name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="bookTitle">Current Book *</label>
+                    <input type="text" id="bookTitle" name="bookTitle" value="The Great Gatsby" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label>Extension Type *</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="moreTime" name="extensionType" value="more_time" required>
+                            <label for="moreTime">
+                                <div class="option-title">More Time to Read</div>
+                                <div class="option-description">
+                                    I need additional time to complete the reading, but I'll still attend the next meeting. 
+                                    The book club will continue on schedule for the next book.
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="radio-option">
+                            <input type="radio" id="pauseProgress" name="extensionType" value="pause_progress">
+                            <label for="pauseProgress">
+                                <div class="option-title">Pause My Progress</div>
+                                <div class="option-description">
+                                    I need to skip this meeting and pause my participation. I'll catch up later and won't 
+                                    be counted toward meeting attendance.
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="requestedDate">When do you need until?</label>
+                    <input type="date" id="requestedDate" name="requestedDate">
+                </div>
+
+                <div class="form-group">
+                    <label for="reason">Reason (Optional)</label>
+                    <textarea id="reason" name="reason" placeholder="Let us know why you need an extension (optional, but helps us plan better)"></textarea>
+                </div>
+
+                <div class="buttons">
+                    <button type="submit" class="btn">Submit Extension Request</button>
+                    <a href="../" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('extensionForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form data
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                bookTitle: document.getElementById('bookTitle').value,
+                extensionType: document.querySelector('input[name="extensionType"]:checked').value,
+                requestedDate: document.getElementById('requestedDate').value,
+                reason: document.getElementById('reason').value,
+                submittedAt: new Date().toISOString()
+            };
+
+            // Get extension type label
+            const extensionTypeLabel = document.querySelector('input[name="extensionType"]:checked').value === 'more_time' 
+                ? 'More Time to Read' 
+                : 'Pause My Progress';
+
+            // Create text content for download
+            let textContent = 'BOOK CLUB EXTENSION REQUEST\n';
+            textContent += '='.repeat(50) + '\n\n';
+            textContent += `Name: ${formData.name}\n`;
+            textContent += `Email: ${formData.email}\n`;
+            textContent += `Book: ${formData.bookTitle}\n\n`;
+            textContent += `Extension Type: ${extensionTypeLabel}\n\n`;
+            
+            if (formData.extensionType === 'more_time') {
+                textContent += 'Details:\n';
+                textContent += '- I need additional time to complete the reading\n';
+                textContent += '- I will still attend the next meeting\n';
+                textContent += '- Book club will continue on schedule for the next book\n\n';
+            } else {
+                textContent += 'Details:\n';
+                textContent += '- I need to skip this meeting\n';
+                textContent += '- I am pausing my participation\n';
+                textContent += '- I will not be counted toward meeting attendance\n\n';
+            }
+            
+            if (formData.requestedDate) {
+                textContent += `Extension Until: ${formData.requestedDate}\n\n`;
+            }
+            
+            if (formData.reason) {
+                textContent += `Reason:\n${formData.reason}\n\n`;
+            }
+            
+            textContent += `Submitted: ${new Date(formData.submittedAt).toLocaleString()}\n`;
+            textContent += '='.repeat(50) + '\n';
+
+            // Create and trigger download
+            const blob = new Blob([textContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `bookclub_extension_${formData.name.replace(/\s+/g, '_')}_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            // Show confirmation
+            alert('Extension request submitted! A copy has been downloaded to your computer. We will review your request and get back to you soon.');
+
+            // Optional: Redirect back to main page after a delay
+            setTimeout(() => {
+                window.location.href = '../';
+            }, 2000);
+        });
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('requestedDate').setAttribute('min', today);
+    </script>
+</body>
+</html>
