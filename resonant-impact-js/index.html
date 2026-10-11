@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-fantasy" data-scene="forest">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#120d09">
+  <title>Resonant Impact — demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Cinzel+Decorative:wght@700&family=Cinzel:wght@500;600&display=swap">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div id="app">
+    <div class="mood" aria-hidden="true"></div>
+    <div class="snow" id="snow" aria-hidden="true"></div>
+    <div class="board" aria-hidden="true"></div>
+    <header class="bar">
+      <a class="home" href="/" aria-label="Back to ThisSpanks home">‹</a>
+      <div class="switch" role="group" aria-label="Theme">
+        <button type="button" data-theme-btn="fantasy" aria-pressed="true">Fantasy</button>
+        <button type="button" data-theme-btn="console" aria-pressed="false">Console</button>
+      </div>
+      <button type="button" class="hb" id="motionBtn" aria-pressed="false" title="Reduce motion">Motion</button>
+      <button type="button" class="hb" id="restartBtn" aria-label="Restart demo">↺</button>
+    </header>
+    <main id="screen"></main>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="lid top" aria-hidden="true"></div>
+    <div class="lid bottom" aria-hidden="true"></div>
+  </div>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
