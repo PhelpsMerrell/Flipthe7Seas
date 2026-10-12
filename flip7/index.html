@@ -1,0 +1,2288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Deck Application</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 140px 1fr 120px;
+            grid-template-rows: auto auto auto;
+            grid-template-areas: 
+                "header header header"
+                "sidebar content powerbar"
+                "footer footer footer";
+            gap: 15px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            grid-area: header;
+            text-align: center;
+            margin-bottom: 10px;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .sidebar {
+            grid-area: sidebar;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .content-area {
+            grid-area: content;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .powerbar {
+            grid-area: powerbar;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .footer-area {
+            grid-area: footer;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: linear-gradient(145deg, #45a049, #3d8b40);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .danger-btn {
+            background: linear-gradient(145deg, #f44336, #d32f2f);
+        }
+
+        .danger-btn:hover {
+            background: linear-gradient(145deg, #d32f2f, #b71c1c);
+        }
+
+        .deck-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .deck-pile {
+            text-align: center;
+        }
+
+        .deck-pile .pile-title {
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .deck-pile .card-back {
+            width: 140px;
+            height: 210px;
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+            transition: transform 0.3s;
+            border: 3px solid #fff;
+        }
+
+        .deck-pile .card-back:hover {
+            transform: scale(1.03);
+        }
+
+        .deck-pile .card-image {
+            width: 140px;
+            height: 210px;
+            border-radius: 10px;
+            border: 3px solid #fff;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+
+        .drawn-pile {
+            width: 100%;
+        }
+
+        .drawn-button {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            padding: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .drawn-button:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+        }
+
+        .drawn-button .drawn-title {
+            font-size: 11px;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .drawn-button .drawn-count {
+            font-size: 18px;
+            color: #64B5F6;
+        }
+
+        .current-round, .parallel-round {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            backdrop-filter: blur(10px);
+            min-height: 80px;
+            transition: all 0.3s ease;
+        }
+
+        .parallel-round {
+            background: rgba(255,140,0,0.1);
+            border: 2px solid rgba(255,140,0,0.3);
+            display: none;
+        }
+
+        .parallel-round.active {
+            display: block;
+        }
+
+        .round-collapsed {
+            min-height: 50px;
+        }
+
+        .round-collapsed .round-cards {
+            display: none;
+        }
+
+        .round-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .round-header:hover {
+            opacity: 0.8;
+        }
+
+        .collapse-toggle {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .collapse-toggle.collapsed {
+            transform: rotate(180deg);
+        }
+
+        .round-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .rounds-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .rounds-container .current-round {
+            order: 1;
+        }
+
+        .rounds-container .parallel-round {
+            order: 2;
+        }
+
+        .rounds-container .current-round.inactive {
+            order: 2;
+        }
+
+        .rounds-container .parallel-round.active-round {
+            order: 1;
+        }
+
+        .round-inactive {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .second-chance-area {
+            background: rgba(138,43,226,0.1);
+            border-radius: 15px;
+            padding: 10px;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(138,43,226,0.3);
+        }
+
+        .second-chance-title {
+            font-size: 14px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: #BA68C8;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .second-chance-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .second-chance-card {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .second-chance-card:hover {
+            transform: scale(1.05);
+        }
+
+        .second-chance-card .card-image,
+        .second-chance-card .card-back {
+            width: 60px;
+            height: 90px;
+            border-radius: 6px;
+            border: 2px solid #fff;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .second-chance-card.clickable {
+            cursor: pointer;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(138, 43, 226, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(138, 43, 226, 0.8); }
+        }
+
+        .card-indicator {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .success-indicator {
+            background: linear-gradient(145deg, #4CAF50, #388E3C);
+        }
+
+        .failure-indicator {
+            background: linear-gradient(145deg, #F44336, #D32F2F);
+        }
+
+        .card-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .power-card-selectable {
+            cursor: pointer;
+            animation: powerGlow 2s infinite;
+        }
+
+        .flip-seven-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .flip-seven-modal {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            color: #333;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            animation: flipSevenCelebration 1s ease-out;
+            border: 3px solid #FF6B35;
+        }
+
+        .flip-seven-title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .flip-seven-message {
+            font-size: 24px;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .flip-seven-numbers {
+            font-size: 18px;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.3);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .flip-seven-button {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .flip-seven-button:hover {
+            background: linear-gradient(145deg, #45a049, #3d8b40);
+            transform: scale(1.05);
+        }
+
+        @keyframes flipSevenCelebration {
+            0% {
+                transform: scale(0.5) rotate(-10deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1) rotate(5deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        .flip-seven-indicator {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 5px 15px;
+            background: linear-gradient(145deg, #FFD700, #FFA500);
+            border-radius: 15px;
+            font-size: 14px;
+            animation: flipSevenGlow 2s infinite;
+            color: #333;
+            font-weight: bold;
+        }
+
+        @keyframes flipSevenGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.8); }
+            50% { box-shadow: 0 0 25px rgba(255, 215, 0, 1), 0 0 35px rgba(255, 165, 0, 0.8); }
+        }
+
+        .round-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .round-title.frozen {
+            color: #64B5F6;
+        }
+
+        .round-title.busted {
+            color: #FF6B6B;
+        }
+
+        .round-title.flip-seven {
+            color: #FFD700;
+        }
+
+        .round-title.frozen-busted {
+            color: #FF8A65;
+        }
+
+        @keyframes powerGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(138, 43, 226, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(138, 43, 226, 0.8); }
+        }
+
+        .freeze-indicator {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 5px 10px;
+            background: linear-gradient(145deg, #2196F3, #1976D2);
+            border-radius: 15px;
+            font-size: 14px;
+            animation: pulse 2s infinite;
+        }
+
+        .bust-indicator {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 5px 10px;
+            background: linear-gradient(145deg, #F44336, #D32F2F);
+            border-radius: 15px;
+            font-size: 14px;
+            animation: pulse 2s infinite;
+        }
+
+        .combined-indicator {
+            display: inline-block;
+            margin-left: 10px;
+            padding: 5px 10px;
+            background: linear-gradient(145deg, #FF7043, #FF5722);
+            border-radius: 15px;
+            font-size: 14px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .round-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            min-height: 100px;
+            align-items: center;
+            padding: 8px;
+        }
+
+        .card-image-round {
+            width: 80px;
+            height: 120px;
+            border-radius: 8px;
+            border: 2px solid #fff;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+
+        .card-image-round.small {
+            width: 60px;
+            height: 90px;
+            border-radius: 6px;
+        }
+
+        .card-image-round:hover {
+            transform: scale(1.05);
+        }
+
+        .card-back-round {
+            width: 80px;
+            height: 120px;
+            background: linear-gradient(145deg, #2c3e50, #34495e);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border: 2px solid #fff;
+            transition: transform 0.3s;
+        }
+
+        .card-back-round.small {
+            width: 60px;
+            height: 90px;
+            border-radius: 6px;
+            font-size: 10px;
+        }
+
+        .card-back-round:hover {
+            transform: scale(1.05);
+        }
+
+        .drawn-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .drawn-display {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #333;
+            padding: 5px;
+        }
+
+        .fanned-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            color: #333;
+        }
+
+        .fanned-card {
+            text-align: center;
+            padding: 8px 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            min-width: 80px;
+            width: 120px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .info-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .import-export {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        textarea {
+            width: 100%;
+            max-width: 600px;
+            height: 100px;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            font-family: monospace;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .flip-three-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .flip-three-modal {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            position: relative;
+            text-align: center;
+            color: #333;
+        }
+
+        .flip-three-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .flip-three-description {
+            font-size: 16px;
+            margin-bottom: 25px;
+            color: #666;
+        }
+
+        .flip-three-cards {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .flip-three-card {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid transparent;
+        }
+
+        .flip-three-card:hover {
+            transform: scale(1.05);
+            border-color: #4CAF50;
+        }
+
+        .flip-three-card.selected {
+            border-color: #4CAF50;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+            transform: scale(1.05);
+        }
+
+        .flip-three-card img {
+            width: 120px;
+            height: 180px;
+            display: block;
+        }
+
+        .flip-three-card-fallback {
+            width: 120px;
+            height: 180px;
+            background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .flip-three-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .flip-three-buttons button {
+            padding: 12px 24px;
+            font-size: 16px;
+        }
+
+        .confirm-btn {
+            background: linear-gradient(145deg, #4CAF50, #45a049);
+        }
+
+        .confirm-btn:hover {
+            background: linear-gradient(145deg, #45a049, #3d8b40);
+        }
+
+        .confirm-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .cancel-btn {
+            background: linear-gradient(145deg, #666, #555);
+        }
+
+        .cancel-btn:hover {
+            background: linear-gradient(145deg, #555, #444);
+        }
+
+        @media (max-width: 768px) {
+            .deck-area {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .controls {
+                justify-content: center;
+            }
+            
+            button {
+                padding: 10px 15px;
+                font-size: 12px;
+            }
+
+            .flip-three-modal {
+                padding: 20px;
+                margin: 20px;
+            }
+
+            .flip-three-cards {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .flip-three-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .flip-three-buttons button {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .second-chance-area {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .second-chance-cards {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Card Deck Application</h1>
+
+        <div class="sidebar">
+            <div class="deck-area">
+                <div class="deck-pile">
+                    <div class="pile-title">Deck</div>
+                    <div class="card-back" id="deckPile">
+                        <img src="assets/card_back.png" alt="Card Back" class="card-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div style="display:none;">DECK</div>
+                    </div>
+                    <div style="margin-top: 8px; text-align: center; font-size: 12px; font-weight: bold;">
+                        <span id="cardsInDeck">94</span> cards
+                    </div>
+                </div>
+                <div class="drawn-pile">
+                    <div class="drawn-button" id="drawnPile">
+                        <div class="drawn-title">Drawn Cards</div>
+                        <div class="drawn-count" id="drawnCount">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="controls">
+                <button id="drawCard">Draw Card</button>
+                <button id="endRound" disabled>End Round</button>
+                <button id="undoAction" disabled>Undo</button>
+                <button id="shuffleRemaining">Shuffle Remaining</button>
+                <button id="shuffleAll" class="danger-btn">Shuffle All Back</button>
+            </div>
+
+            <div class="rounds-container">
+                <div class="current-round" id="currentRoundArea">
+                    <div class="round-header" id="currentRoundHeader">
+                        <div class="round-title" id="roundTitle">Current Round</div>
+                        <button class="collapse-toggle" id="currentRoundToggle">▼</button>
+                    </div>
+                    <div class="round-cards" id="currentRoundCards"></div>
+                </div>
+
+                <div class="parallel-round" id="parallelRoundArea">
+                    <div class="round-header" id="parallelRoundHeader">
+                        <div class="round-title" id="parallelRoundTitle">Parallel Round (X2)</div>
+                        <button class="collapse-toggle" id="parallelRoundToggle">▼</button>
+                    </div>
+                    <div class="round-cards" id="parallelRoundCards"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="powerbar">
+            <div class="second-chance-area">
+                <div class="second-chance-title">Power Cards</div>
+                <div class="second-chance-cards" id="secondChanceCards">
+                    <div style="color: rgba(255,255,255,0.5); font-style: italic; font-size: 10px;">No Power cards</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-area">
+            <div class="import-export">
+                <button id="exportGame">Export Game State</button>
+                <button id="importGame">Import Game State</button>
+                <br>
+                <textarea id="gameStateText" placeholder="Paste game state JSON here to import..." class="hidden"></textarea>
+                <br>
+                <button id="confirmImport" class="hidden">Confirm Import</button>
+                <button id="cancelImport" class="hidden">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="drawn-overlay" id="drawnOverlay">
+        <div class="drawn-display">
+            <button class="close-btn" id="closeDrawn">&times;</button>
+            <h2 style="color: #333; margin-bottom: 20px; text-align: center;">Drawn Cards</h2>
+            <div class="fanned-cards" id="fannedCards"></div>
+        </div>
+    </div>
+
+    <div class="flip-three-overlay" id="flipThreeOverlay">
+        <div class="flip-three-modal">
+            <div class="flip-three-title">Flip Three!</div>
+            <div class="flip-three-description">Choose one card to keep for your current round. The other cards will go to the drawn pile.</div>
+            <div class="flip-three-cards" id="flipThreeCards"></div>
+            <div class="flip-three-buttons">
+                <button class="confirm-btn" id="confirmFlipThree" disabled>Keep Selected Card</button>
+                <button class="cancel-btn" id="cancelFlipThree">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="flip-seven-overlay" id="flipSevenOverlay">
+        <div class="flip-seven-modal">
+            <div class="flip-seven-title">🎉 FLIP 7! 🎉</div>
+            <div class="flip-seven-message">Incredible! You got 7 unique numbers!</div>
+            <div class="flip-seven-numbers" id="flipSevenNumbers"></div>
+            <button class="flip-seven-button" id="closeFlipSeven">Awesome!</button>
+        </div>
+    </div>
+
+    <script>
+        class CardDeckApp {
+            constructor() {
+                this.initializeDeck();
+                this.drawnCards = [];
+                this.currentRound = [];
+                this.powerCards = []; // Renamed from secondChanceCards
+                this.history = [];
+                this.flipThreeCards = [];
+                this.selectedFlipThreeCard = null;
+                this.isFlipThreeActive = false;
+                this.isFrozen = false;
+                this.isBusted = false;
+                this.hasFlipSeven = false; // Track if achieved 7 unique numbers
+                this.selectedCardForBoost = null; // For power card application
+                
+                // Parallel round state
+                this.isParallelActive = false;
+                this.parallelRound = [];
+                this.parallelIsFrozen = false;
+                this.parallelIsBusted = false;
+                this.parallelHasFlipSeven = false;
+                this.activeRound = 'main'; // 'main' or 'parallel'
+                
+                // Collapse state
+                this.currentRoundCollapsed = false;
+                this.parallelRoundCollapsed = false;
+                
+                this.initializeEventListeners();
+                this.updateDisplay();
+            }
+
+            toggleCurrentRoundCollapse() {
+                this.currentRoundCollapsed = !this.currentRoundCollapsed;
+                this.updateRoundCollapseState();
+            }
+
+            toggleParallelRoundCollapse() {
+                this.parallelRoundCollapsed = !this.parallelRoundCollapsed;
+                this.updateRoundCollapseState();
+            }
+
+            updateRoundCollapseState() {
+                const currentRoundArea = document.getElementById('currentRoundArea');
+                const parallelRoundArea = document.getElementById('parallelRoundArea');
+                const currentToggle = document.getElementById('currentRoundToggle');
+                const parallelToggle = document.getElementById('parallelRoundToggle');
+
+                // Update current round collapse state
+                if (this.currentRoundCollapsed) {
+                    currentRoundArea.classList.add('round-collapsed');
+                    currentToggle.classList.add('collapsed');
+                } else {
+                    currentRoundArea.classList.remove('round-collapsed');
+                    currentToggle.classList.remove('collapsed');
+                }
+
+                // Update parallel round collapse state
+                if (this.parallelRoundCollapsed) {
+                    parallelRoundArea.classList.add('round-collapsed');
+                    parallelToggle.classList.add('collapsed');
+                } else {
+                    parallelRoundArea.classList.remove('round-collapsed');
+                    parallelToggle.classList.remove('collapsed');
+                }
+            }
+
+            updateRoundOrdering() {
+                const currentRoundArea = document.getElementById('currentRoundArea');
+                const parallelRoundArea = document.getElementById('parallelRoundArea');
+                
+                // Remove existing classes
+                currentRoundArea.classList.remove('active-round', 'inactive');
+                parallelRoundArea.classList.remove('active-round', 'inactive');
+                
+                if (this.isParallelActive) {
+                    if (this.activeRound === 'parallel') {
+                        parallelRoundArea.classList.add('active-round');
+                        currentRoundArea.classList.add('inactive');
+                    } else {
+                        currentRoundArea.classList.add('active-round');
+                        parallelRoundArea.classList.add('inactive');
+                    }
+                }
+            }
+
+            initializeDeck() {
+                this.deck = [];
+                
+                // Number cards: 12 twelves, 11 elevens, etc., down to 1 one, plus one 0
+                for (let num = 12; num >= 1; num--) {
+                    for (let i = 0; i < num; i++) {
+                        this.deck.push({ type: 'number', value: num, id: `${num}_${i}` });
+                    }
+                }
+                this.deck.push({ type: 'number', value: 0, id: '0_0' });
+
+                // Action cards: 3 each of "Flip Three", "Freeze", "Second Chance"
+                const actionCards = ['flip_three', 'freeze', 'second_chance'];
+                actionCards.forEach(action => {
+                    for (let i = 0; i < 3; i++) {
+                        this.deck.push({ type: 'action', value: action, id: `${action}_${i}` });
+                    }
+                });
+
+                // Modifier cards: +2, +4, +6, +8, +10, X2
+                const modifiers = [2, 4, 6, 8, 10, 'x2'];
+                modifiers.forEach(mod => {
+                    const prefix = mod === 'x2' ? 'multiplier' : 'plus';
+                    this.deck.push({ type: 'modifier', value: mod, id: `${prefix}_${mod}` });
+                });
+
+                this.shuffleDeck();
+            }
+
+            shuffleDeck() {
+                for (let i = this.deck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
+                }
+            }
+
+            saveState() {
+                this.history.push({
+                    deck: [...this.deck],
+                    drawnCards: [...this.drawnCards],
+                    currentRound: [...this.currentRound],
+                    powerCards: [...this.powerCards],
+                    isFrozen: this.isFrozen,
+                    isBusted: this.isBusted,
+                    isParallelActive: this.isParallelActive,
+                    parallelRound: [...this.parallelRound],
+                    parallelIsFrozen: this.parallelIsFrozen,
+                    parallelIsBusted: this.parallelIsBusted,
+                    parallelHasFlipSeven: this.parallelHasFlipSeven,
+                    activeRound: this.activeRound
+                });
+            }
+
+            getActiveRoundData() {
+                if (this.activeRound === 'parallel') {
+                    return {
+                        round: this.parallelRound,
+                        isFrozen: this.parallelIsFrozen,
+                        isBusted: this.parallelIsBusted,
+                        hasFlipSeven: this.parallelHasFlipSeven
+                    };
+                } else {
+                    return {
+                        round: this.currentRound,
+                        isFrozen: this.isFrozen,
+                        isBusted: this.isBusted,
+                        hasFlipSeven: this.hasFlipSeven
+                    };
+                }
+            }
+
+            setActiveRoundData(property, value) {
+                if (this.activeRound === 'parallel') {
+                    this[`parallel${property.charAt(0).toUpperCase() + property.slice(1)}`] = value;
+                } else {
+                    this[property] = value;
+                }
+            }
+
+            drawCard() {
+                // Get active round state
+                const activeRoundData = this.getActiveRoundData();
+                
+                // Check if active round is frozen, busted, or at 7-card limit first
+                if (activeRoundData.isFrozen || activeRoundData.isBusted || activeRoundData.round.length >= 7) {
+                    return null;
+                }
+
+                // Handle empty deck
+                if (this.deck.length === 0) {
+                    // If we have drawn cards available, shuffle them back into deck
+                    if (this.drawnCards.length > 0) {
+                        this.deck = [...this.drawnCards];
+                        this.drawnCards = [];
+                        this.shuffleDeck();
+                        // Update display to reflect the new deck state
+                        this.updateDisplay();
+                    } else {
+                        // No more cards available anywhere
+                        return null;
+                    }
+                }
+
+                // At this point we should have cards in the deck
+                if (this.deck.length === 0) {
+                    return null;
+                }
+
+                this.saveState();
+                const card = this.deck.pop();
+                
+                // Check if this is an action card
+                if (card.type === 'action') {
+                    if (card.value === 'flip_three') {
+                        this.handleFlipThree(card);
+                    } else if (card.value === 'freeze') {
+                        this.handleFreeze(card, this.activeRound);
+                    } else if (card.value === 'second_chance') {
+                        this.handleSecondChance(card);
+                    } else {
+                        // Other action cards go to active round
+                        activeRoundData.round.push(card);
+                    }
+                } else if (card.type === 'modifier') {
+                    // Modifier cards go to power cards area
+                    this.handlePowerCard(card);
+                } else {
+                    // For number cards, add to active round and check for bust
+                    activeRoundData.round.push(card);
+                    
+                    // Check for bust after adding the card
+                    if (card.type === 'number') {
+                        this.checkForBust(card, this.activeRound);
+                        // Check for Flip 7 achievement after adding number card
+                        this.checkForFlipSeven(this.activeRound);
+                    }
+                }
+                
+                this.updateDisplay();
+                return card;
+            }
+
+            handleSecondChance(secondChanceCard) {
+                // Add second chance card to power cards area
+                this.powerCards.push(secondChanceCard);
+            }
+
+            handlePowerCard(powerCard) {
+                // Add modifier/power card to power cards area
+                this.powerCards.push(powerCard);
+            }
+
+            activateX2Card(powerIndex) {
+                if (powerIndex >= this.powerCards.length || this.isParallelActive) {
+                    return false;
+                }
+
+                const powerCard = this.powerCards[powerIndex];
+                
+                // Only x2 cards can activate parallel rounds
+                if (powerCard.type !== 'modifier' || powerCard.value !== 'x2') {
+                    return false;
+                }
+
+                this.saveState();
+
+                // Activate parallel round
+                this.isParallelActive = true;
+                this.parallelRound = [];
+                this.parallelIsFrozen = false;
+                this.parallelIsBusted = false;
+                this.parallelHasFlipSeven = false;
+                this.activeRound = 'parallel';
+
+                // Remove the x2 card from power cards (it will go to drawn pile when both rounds complete)
+                const usedX2Card = this.powerCards.splice(powerIndex, 1)[0];
+                // Keep the x2 card in a temporary holding area until both rounds complete
+                this.usedX2Card = usedX2Card;
+
+                this.updateDisplay();
+                return true;
+            }
+
+            applyPowerCard(powerIndex, targetCardIndex) {
+                const activeRoundData = this.getActiveRoundData();
+                if (powerIndex >= this.powerCards.length || targetCardIndex >= activeRoundData.round.length) {
+                    return false;
+                }
+
+                const powerCard = this.powerCards[powerIndex];
+                const targetCard = activeRoundData.round[targetCardIndex];
+
+                // Only apply to number cards
+                if (targetCard.type !== 'number') {
+                    return false;
+                }
+
+                this.saveState();
+
+                // Apply the power card effect
+                if (powerCard.value === 'x2') {
+                    targetCard.boostedValue = targetCard.value * 2;
+                } else if (typeof powerCard.value === 'number') {
+                    targetCard.boostedValue = targetCard.value + powerCard.value;
+                }
+
+                // Mark card as boosted
+                targetCard.isBoosted = true;
+
+                // Remove the power card and move to drawn pile
+                const usedPowerCard = this.powerCards.splice(powerIndex, 1)[0];
+                this.drawnCards.push(usedPowerCard);
+
+                this.updateDisplay();
+                return true;
+            }
+
+            applyPowerCardToParallel(powerIndex, targetCardIndex) {
+                if (powerIndex >= this.powerCards.length || targetCardIndex >= this.parallelRound.length) {
+                    return false;
+                }
+
+                const powerCard = this.powerCards[powerIndex];
+                const targetCard = this.parallelRound[targetCardIndex];
+
+                // Only apply to number cards
+                if (targetCard.type !== 'number') {
+                    return false;
+                }
+
+                this.saveState();
+
+                // Apply the power card effect
+                if (powerCard.value === 'x2') {
+                    targetCard.boostedValue = targetCard.value * 2;
+                } else if (typeof powerCard.value === 'number') {
+                    targetCard.boostedValue = targetCard.value + powerCard.value;
+                }
+
+                // Mark card as boosted
+                targetCard.isBoosted = true;
+
+                // Remove the power card and move to drawn pile
+                const usedPowerCard = this.powerCards.splice(powerIndex, 1)[0];
+                this.drawnCards.push(usedPowerCard);
+
+                this.updateDisplay();
+                return true;
+            }
+
+            selectPowerCardForBoosting(powerIndex) {
+                this.selectedCardForBoost = powerIndex;
+                this.updateDisplay();
+            }
+
+            useSecondChance(secondChanceIndex) {
+                const activeRoundData = this.getActiveRoundData();
+                if (!activeRoundData.isBusted || secondChanceIndex >= this.powerCards.length) {
+                    return false;
+                }
+
+                const powerCard = this.powerCards[secondChanceIndex];
+                // Only second chance cards can remove bust
+                if (powerCard.type !== 'action' || powerCard.value !== 'second_chance') {
+                    return false;
+                }
+
+                // Save state before using second chance
+                this.saveState();
+
+                // Remove the second chance card and move it to drawn pile
+                const usedSecondChance = this.powerCards.splice(secondChanceIndex, 1)[0];
+                this.drawnCards.push(usedSecondChance);
+
+                // Find and remove the bust-causing duplicate card from active round
+                this.removeBustCard(this.activeRound);
+
+                // Clear bust state for active round
+                this.setActiveRoundData('isBusted', false);
+
+                this.updateDisplay();
+                return true;
+            }
+
+            removeBustCard(roundType = 'main') {
+                const round = roundType === 'parallel' ? this.parallelRound : this.currentRound;
+                
+                // Find duplicate number cards in the specified round
+                const numberCards = round.filter(card => card.type === 'number');
+                const cardCounts = {};
+                
+                // Count occurrences of each number
+                numberCards.forEach(card => {
+                    if (cardCounts[card.value]) {
+                        cardCounts[card.value].push(card);
+                    } else {
+                        cardCounts[card.value] = [card];
+                    }
+                });
+
+                // Find the first duplicate and remove the most recent one
+                for (const value in cardCounts) {
+                    if (cardCounts[value].length > 1) {
+                        const duplicateCard = cardCounts[value][cardCounts[value].length - 1];
+                        const cardIndex = round.findIndex(card => card.id === duplicateCard.id);
+                        if (cardIndex !== -1) {
+                            const removedCard = round.splice(cardIndex, 1)[0];
+                            this.drawnCards.push(removedCard);
+                            break; // Only remove one card
+                        }
+                    }
+                }
+            }
+
+            checkForBust(newCard, roundType = 'main') {
+                const round = roundType === 'parallel' ? this.parallelRound : this.currentRound;
+                
+                // Count occurrences of this number value in specified round
+                const sameValueCards = round.filter(card => 
+                    card.type === 'number' && card.value === newCard.value
+                );
+                
+                // If we have more than one card with the same number value, it's a bust
+                if (sameValueCards.length > 1) {
+                    this.setActiveRoundData('isBusted', true);
+                }
+            }
+
+            checkForFlipSeven(roundType = 'main') {
+                const round = roundType === 'parallel' ? this.parallelRound : this.currentRound;
+                const hasFlipSeven = roundType === 'parallel' ? this.parallelHasFlipSeven : this.hasFlipSeven;
+                
+                // Get all number cards in specified round
+                const numberCards = round.filter(card => card.type === 'number');
+                
+                // Get unique number values
+                const uniqueNumbers = new Set(numberCards.map(card => card.value));
+                
+                // Check if we have exactly 7 unique numbers
+                if (uniqueNumbers.size === 7 && !hasFlipSeven) {
+                    this.setActiveRoundData('hasFlipSeven', true);
+                    this.showFlipSevenCelebration(Array.from(uniqueNumbers).sort((a, b) => a - b), roundType);
+                    return true;
+                }
+                
+                return false;
+            }
+
+            showFlipSevenCelebration(uniqueNumbers, roundType = 'main') {
+                const overlay = document.getElementById('flipSevenOverlay');
+                const numbersContainer = document.getElementById('flipSevenNumbers');
+                const titleContainer = document.querySelector('.flip-seven-title');
+                
+                // Display the unique numbers with round type
+                numbersContainer.textContent = `Numbers achieved in ${roundType === 'parallel' ? 'Parallel' : 'Main'} round: ${uniqueNumbers.join(', ')}`;
+                titleContainer.textContent = `🎉 FLIP 7 ${roundType === 'parallel' ? '(Parallel)' : ''}! 🎉`;
+                
+                // Show the modal
+                overlay.style.display = 'flex';
+            }
+
+            handleFreeze(freezeCard, roundType = 'main') {
+                // Add freeze card to the specified round
+                if (roundType === 'parallel') {
+                    this.parallelRound.push(freezeCard);
+                    this.parallelIsFrozen = true;
+                } else {
+                    this.currentRound.push(freezeCard);
+                    this.isFrozen = true;
+                }
+            }
+
+            handleFlipThree(flipThreeCard) {
+                // Add flip three card to power cards area
+                this.powerCards.push(flipThreeCard);
+            }
+
+            activateFlipThree(powerIndex) {
+                if (powerIndex >= this.powerCards.length || this.isFlipThreeActive) {
+                    return false;
+                }
+
+                const powerCard = this.powerCards[powerIndex];
+                
+                // Only flip three cards can activate this
+                if (powerCard.type !== 'action' || powerCard.value !== 'flip_three') {
+                    return false;
+                }
+
+                this.saveState();
+
+                // Remove the flip three card from power cards and move to drawn pile
+                const usedFlipThree = this.powerCards.splice(powerIndex, 1)[0];
+                this.drawnCards.push(usedFlipThree);
+                
+                // Draw 3 additional cards if possible
+                const cardsToShow = [];
+                for (let i = 0; i < 3; i++) {
+                    if (this.deck.length === 0) {
+                        // If we run out of cards, shuffle drawn cards back (excluding the flip three we just added)
+                        const flipThreeTemp = this.drawnCards.pop(); // Remove flip three temporarily
+                        if (this.drawnCards.length > 0) {
+                            this.deck = [...this.drawnCards];
+                            this.drawnCards = [flipThreeTemp]; // Put flip three back
+                            this.shuffleDeck();
+                        } else {
+                            this.drawnCards.push(flipThreeTemp); // Put flip three back
+                            break; // No more cards to draw
+                        }
+                    }
+                    
+                    if (this.deck.length > 0) {
+                        cardsToShow.push(this.deck.pop());
+                    }
+                }
+                
+                if (cardsToShow.length > 0) {
+                    this.showFlipThreeSelection(cardsToShow);
+                    return true;
+                } else {
+                    // No cards available, just continue
+                    alert('No more cards available for Flip Three!');
+                    return false;
+                }
+            }
+
+            showFlipThreeSelection(cards) {
+                this.flipThreeCards = cards;
+                this.selectedFlipThreeCard = null;
+                this.isFlipThreeActive = true;
+                
+                const overlay = document.getElementById('flipThreeOverlay');
+                const cardsContainer = document.getElementById('flipThreeCards');
+                
+                // Clear previous cards
+                cardsContainer.innerHTML = '';
+                
+                // Create card elements
+                cards.forEach((card, index) => {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'flip-three-card';
+                    cardDiv.dataset.cardIndex = index;
+                    
+                    const img = document.createElement('img');
+                    img.src = this.getCardImageSrc(card);
+                    img.alt = this.getCardDisplayName(card);
+                    
+                    // Fallback if image doesn't load
+                    img.onerror = () => {
+                        const fallback = document.createElement('div');
+                        fallback.className = 'flip-three-card-fallback';
+                        fallback.textContent = this.getCardDisplayName(card);
+                        cardDiv.replaceChild(fallback, img);
+                    };
+                    
+                    cardDiv.appendChild(img);
+                    
+                    // Add click handler
+                    cardDiv.addEventListener('click', () => {
+                        this.selectFlipThreeCard(index);
+                    });
+                    
+                    cardsContainer.appendChild(cardDiv);
+                });
+                
+                // Show the modal
+                overlay.style.display = 'flex';
+                
+                // Disable main game controls
+                this.updateDisplay();
+            }
+
+            selectFlipThreeCard(index) {
+                // Remove previous selection
+                const allCards = document.querySelectorAll('.flip-three-card');
+                allCards.forEach(card => card.classList.remove('selected'));
+                
+                // Select new card
+                allCards[index].classList.add('selected');
+                this.selectedFlipThreeCard = index;
+                
+                // Enable confirm button
+                document.getElementById('confirmFlipThree').disabled = false;
+            }
+
+            confirmFlipThreeSelection() {
+                if (this.selectedFlipThreeCard === null) return;
+                
+                const selectedCard = this.flipThreeCards[this.selectedFlipThreeCard];
+                const unselectedCards = this.flipThreeCards.filter((_, index) => index !== this.selectedFlipThreeCard);
+                const activeRoundData = this.getActiveRoundData();
+                
+                // Handle the selected card based on its type
+                if (selectedCard.type === 'action') {
+                    if (selectedCard.value === 'flip_three') {
+                        // Another flip three - goes to power cards area
+                        this.powerCards.push(selectedCard);
+                    } else if (selectedCard.value === 'freeze') {
+                        // Freeze card - add to active round and set frozen state
+                        if (activeRoundData.round.length < 7) {
+                            activeRoundData.round.push(selectedCard);
+                            this.setActiveRoundData('isFrozen', true);
+                        } else {
+                            this.drawnCards.push(selectedCard);
+                        }
+                    } else if (selectedCard.value === 'second_chance') {
+                        // Second chance - goes to power cards area
+                        this.powerCards.push(selectedCard);
+                    } else {
+                        // Other action cards - add to active round if space
+                        if (activeRoundData.round.length < 7) {
+                            activeRoundData.round.push(selectedCard);
+                        } else {
+                            this.drawnCards.push(selectedCard);
+                        }
+                    }
+                } else if (selectedCard.type === 'modifier') {
+                    // Modifier cards go to power cards area
+                    this.powerCards.push(selectedCard);
+                } else {
+                    // Number cards - add to active round if space
+                    if (activeRoundData.round.length < 7) {
+                        activeRoundData.round.push(selectedCard);
+                        // Check for bust after adding the card
+                        if (selectedCard.type === 'number') {
+                            this.checkForBust(selectedCard, this.activeRound);
+                            // Check for Flip 7 achievement after adding number card
+                            this.checkForFlipSeven(this.activeRound);
+                        }
+                    } else {
+                        this.drawnCards.push(selectedCard);
+                    }
+                }
+                
+                // Add unselected cards to drawn pile
+                this.drawnCards.push(...unselectedCards);
+                
+                // Clean up
+                this.closeFlipThreeModal();
+            }
+
+            cancelFlipThreeSelection() {
+                // Put all flip three cards back in the deck and shuffle
+                this.deck.push(...this.flipThreeCards);
+                this.shuffleDeck();
+                
+                // Clean up
+                this.closeFlipThreeModal();
+            }
+
+            closeFlipThreeModal() {
+                this.flipThreeCards = [];
+                this.selectedFlipThreeCard = null;
+                this.isFlipThreeActive = false;
+                
+                document.getElementById('flipThreeOverlay').style.display = 'none';
+                document.getElementById('confirmFlipThree').disabled = true;
+                
+                this.updateDisplay();
+            }
+
+            endRound() {
+                if (this.isFlipThreeActive) return;
+                
+                const activeRoundData = this.getActiveRoundData();
+                if (activeRoundData.round.length === 0) return;
+                
+                this.saveState();
+                
+                if (this.isParallelActive) {
+                    if (this.activeRound === 'main') {
+                        // End main round, switch to parallel round
+                        this.activeRound = 'parallel';
+                    } else {
+                        // End parallel round, check if both rounds are complete
+                        this.completeParallelRounds();
+                    }
+                } else {
+                    // Normal single round completion
+                    this.drawnCards.push(...this.currentRound);
+                    this.drawnCards.push(...this.powerCards);
+                    this.currentRound = [];
+                    this.powerCards = [];
+                    this.isFrozen = false;
+                    this.isBusted = false;
+                    this.hasFlipSeven = false;
+                }
+                
+                this.updateDisplay();
+            }
+            
+            completeParallelRounds() {
+                // Move all cards from both rounds and power cards to drawn pile
+                this.drawnCards.push(...this.currentRound);
+                this.drawnCards.push(...this.parallelRound);
+                this.drawnCards.push(...this.powerCards);
+                
+                // Add the used x2 card to drawn pile
+                if (this.usedX2Card) {
+                    this.drawnCards.push(this.usedX2Card);
+                    this.usedX2Card = null;
+                }
+                
+                // Reset all round states
+                this.currentRound = [];
+                this.parallelRound = [];
+                this.powerCards = [];
+                this.isParallelActive = false;
+                this.activeRound = 'main';
+                this.isFrozen = false;
+                this.isBusted = false;
+                this.hasFlipSeven = false;
+                this.parallelIsFrozen = false;
+                this.parallelIsBusted = false;
+                this.parallelHasFlipSeven = false;
+            }
+
+            undoAction() {
+                if (this.history.length === 0 || this.isFlipThreeActive) return;
+                
+                const previousState = this.history.pop();
+                this.deck = previousState.deck;
+                this.drawnCards = previousState.drawnCards;
+                this.currentRound = previousState.currentRound;
+                this.powerCards = previousState.powerCards || [];
+                this.isFrozen = previousState.isFrozen !== undefined ? previousState.isFrozen : false;
+                this.isBusted = previousState.isBusted !== undefined ? previousState.isBusted : false;
+                
+                // Restore parallel round state if it exists
+                this.isParallelActive = previousState.isParallelActive || false;
+                this.parallelRound = previousState.parallelRound || [];
+                this.parallelIsFrozen = previousState.parallelIsFrozen || false;
+                this.parallelIsBusted = previousState.parallelIsBusted || false;
+                this.parallelHasFlipSeven = previousState.parallelHasFlipSeven || false;
+                this.activeRound = previousState.activeRound || 'main';
+                
+                this.updateDisplay();
+            }
+
+            shuffleRemainingCards() {
+                if (this.isFlipThreeActive) return;
+                this.saveState();
+                this.shuffleDeck();
+                this.updateDisplay();
+            }
+
+            shuffleAllCards() {
+                if (this.isFlipThreeActive) return;
+                this.saveState();
+                
+                // Add all cards back to deck
+                this.deck.push(...this.drawnCards, ...this.currentRound, ...this.powerCards);
+                if (this.isParallelActive) {
+                    this.deck.push(...this.parallelRound);
+                    if (this.usedX2Card) {
+                        this.deck.push(this.usedX2Card);
+                        this.usedX2Card = null;
+                    }
+                }
+                
+                // Reset all states
+                this.drawnCards = [];
+                this.currentRound = [];
+                this.parallelRound = [];
+                this.powerCards = [];
+                this.isParallelActive = false;
+                this.activeRound = 'main';
+                this.isFrozen = false;
+                this.isBusted = false;
+                this.hasFlipSeven = false;
+                this.parallelIsFrozen = false;
+                this.parallelIsBusted = false;
+                this.parallelHasFlipSeven = false;
+                
+                this.shuffleDeck();
+                this.updateDisplay();
+            }
+
+            getCardImageSrc(card) {
+                let filename = '';
+                if (card.type === 'number') {
+                    filename = `card_${card.value}.png`;
+                } else if (card.type === 'action') {
+                    filename = `card_${card.value}.png`;
+                } else if (card.type === 'modifier') {
+                    if (card.value === 'x2') {
+                        filename = 'card_multiplier_x2.png';
+                    } else {
+                        filename = `card_plus_${card.value}.png`;
+                    }
+                }
+                return `assets/${filename}`;
+            }
+
+            createCardElement(card, forRound = false) {
+                const cardWrapper = document.createElement('div');
+                cardWrapper.className = 'card-wrapper';
+                
+                const img = document.createElement('img');
+                img.src = this.getCardImageSrc(card);
+                img.alt = this.getCardDisplayName(card);
+                
+                if (forRound) {
+                    img.className = 'card-image-round';
+                    // Make cards smaller when both rounds are active
+                    if (this.isParallelActive) {
+                        img.classList.add('small');
+                    }
+                } else {
+                    img.className = 'card-image';
+                }
+                
+                // Fallback if image doesn't load
+                img.onerror = () => {
+                    const fallback = document.createElement('div');
+                    if (forRound) {
+                        fallback.className = 'card-back-round';
+                        if (this.isParallelActive) {
+                            fallback.classList.add('small');
+                        }
+                    } else {
+                        fallback.className = 'card-back';
+                        fallback.style.background = 'linear-gradient(145deg, #fff, #f0f0f0)';
+                        fallback.style.color = '#333';
+                    }
+                    fallback.style.fontSize = this.isParallelActive && forRound ? '10px' : '12px';
+                    fallback.style.fontWeight = 'bold';
+                    fallback.innerHTML = this.getCardDisplayName(card);
+                    cardWrapper.replaceChild(fallback, img);
+                };
+                
+                cardWrapper.appendChild(img);
+                
+                // Add success/failure indicator for number cards in round
+                if (forRound && card.type === 'number') {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'card-indicator';
+                    
+                    const effectiveValue = card.isBoosted ? card.boostedValue : card.value;
+                    
+                    if (effectiveValue >= 7) {
+                        indicator.classList.add('success-indicator');
+                        indicator.textContent = '✓';
+                        indicator.title = `Success (${effectiveValue})`;
+                    } else {
+                        indicator.classList.add('failure-indicator');
+                        indicator.textContent = '✗';
+                        indicator.title = `Failure (${effectiveValue})`;
+                    }
+                    
+                    // Adjust indicator size for small cards
+                    if (this.isParallelActive) {
+                        indicator.style.width = '18px';
+                        indicator.style.height = '18px';
+                        indicator.style.fontSize = '12px';
+                    }
+                    
+                    cardWrapper.appendChild(indicator);
+                }
+                
+                return cardWrapper;
+            }
+
+            getCardDisplayName(card) {
+                if (card.type === 'number') {
+                    return card.value.toString();
+                } else if (card.type === 'action') {
+                    switch(card.value) {
+                        case 'flip_three': return 'Flip Three';
+                        case 'freeze': return 'Freeze';
+                        case 'second_chance': return 'Second Chance';
+                    }
+                } else if (card.type === 'modifier') {
+                    if (card.value === 'x2') {
+                        return 'X2';
+                    } else {
+                        return `+${card.value}`;
+                    }
+                }
+                return card.value;
+            }
+
+            updateDisplay() {
+                document.getElementById('cardsInDeck').textContent = this.deck.length;
+                document.getElementById('drawnCount').textContent = this.drawnCards.length;
+
+                // Update deck pile visibility
+                const deckPile = document.getElementById('deckPile');
+                const totalAvailableCards = this.deck.length + this.drawnCards.length;
+                if (totalAvailableCards === 0) {
+                    deckPile.style.opacity = '0.3';
+                } else {
+                    deckPile.style.opacity = '1';
+                }
+
+                // Update power cards display
+                const powerCardsContainer = document.getElementById('secondChanceCards');
+                powerCardsContainer.innerHTML = '';
+                
+                if (this.powerCards.length === 0) {
+                    const placeholder = document.createElement('div');
+                    placeholder.style.color = 'rgba(255,255,255,0.5)';
+                    placeholder.style.fontStyle = 'italic';
+                    placeholder.textContent = 'No Power cards available';
+                    powerCardsContainer.appendChild(placeholder);
+                } else {
+                    this.powerCards.forEach((card, index) => {
+                        const cardElement = this.createCardElement(card, false);
+                        cardElement.className = 'second-chance-card';
+                        
+                        if (card.type === 'action' && card.value === 'second_chance') {
+                            // Second Chance cards - clickable if active round is busted
+                            const activeRoundData = this.getActiveRoundData();
+                            if (activeRoundData.isBusted) {
+                                cardElement.classList.add('clickable');
+                                cardElement.title = 'Click to remove a duplicate card and continue';
+                                cardElement.addEventListener('click', () => {
+                                    this.useSecondChance(index);
+                                });
+                            } else {
+                                cardElement.title = 'Can only use when busted';
+                            }
+                        } else if (card.type === 'action' && card.value === 'flip_three') {
+                            // Flip Three cards - clickable to activate
+                            if (!this.isFlipThreeActive) {
+                                cardElement.classList.add('power-card-selectable');
+                                cardElement.title = 'Click to draw 3 cards and choose 1';
+                                cardElement.addEventListener('click', () => {
+                                    this.activateFlipThree(index);
+                                });
+                            } else {
+                                cardElement.title = 'Flip Three already active';
+                            }
+                        } else if (card.type === 'modifier') {
+                            if (card.value === 'x2') {
+                                // X2 cards - clickable to start parallel round or boost cards
+                                if (!this.isParallelActive) {
+                                    cardElement.classList.add('power-card-selectable');
+                                    cardElement.title = 'Click to start parallel round';
+                                    cardElement.addEventListener('click', () => {
+                                        this.activateX2Card(index);
+                                    });
+                                } else {
+                                    cardElement.title = 'Parallel round already active';
+                                }
+                            } else {
+                                // Other modifier cards - clickable to boost number cards
+                                const activeRoundData = this.getActiveRoundData();
+                                const hasNumberCards = activeRoundData.round.some(c => c.type === 'number');
+                                if (hasNumberCards) {
+                                    cardElement.classList.add('power-card-selectable');
+                                    cardElement.title = 'Click to boost a number card';
+                                    cardElement.addEventListener('click', () => {
+                                        this.selectPowerCardForBoosting(index);
+                                    });
+                                } else {
+                                    cardElement.title = 'Need number cards in round to boost';
+                                }
+                            }
+                        }
+                        
+                        powerCardsContainer.appendChild(cardElement);
+                    });
+                }
+
+                // Update current round display with click handlers for boosting
+                const roundCardsContainer = document.getElementById('currentRoundCards');
+                roundCardsContainer.innerHTML = '';
+                this.currentRound.forEach((card, index) => {
+                    const cardElement = this.createCardElement(card, true);
+                    
+                    // Make number cards clickable if we have selected a power card and this is the active round
+                    if (this.selectedCardForBoost !== null && card.type === 'number' && !card.isBoosted && this.activeRound === 'main') {
+                        cardElement.style.cursor = 'pointer';
+                        cardElement.style.animation = 'powerGlow 2s infinite';
+                        cardElement.title = 'Click to apply power card';
+                        cardElement.addEventListener('click', () => {
+                            this.applyPowerCard(this.selectedCardForBoost, index);
+                            this.selectedCardForBoost = null;
+                        });
+                    }
+                    
+                    roundCardsContainer.appendChild(cardElement);
+                });
+
+                // Update parallel round display if active
+                const parallelRoundArea = document.getElementById('parallelRoundArea');
+                const parallelRoundContainer = document.getElementById('parallelRoundCards');
+                
+                if (this.isParallelActive) {
+                    parallelRoundArea.classList.add('active');
+                    parallelRoundContainer.innerHTML = '';
+                    
+                    this.parallelRound.forEach((card, index) => {
+                        const cardElement = this.createCardElement(card, true);
+                        
+                        // Make number cards clickable if we have selected a power card and this is the active round
+                        if (this.selectedCardForBoost !== null && card.type === 'number' && !card.isBoosted && this.activeRound === 'parallel') {
+                            cardElement.style.cursor = 'pointer';
+                            cardElement.style.animation = 'powerGlow 2s infinite';
+                            cardElement.title = 'Click to apply power card';
+                            cardElement.addEventListener('click', () => {
+                                this.applyPowerCardToParallel(this.selectedCardForBoost, index);
+                                this.selectedCardForBoost = null;
+                            });
+                        }
+                        
+                        parallelRoundContainer.appendChild(cardElement);
+                    });
+                } else {
+                    parallelRoundArea.classList.remove('active');
+                }
+
+                // Update round titles and states
+                const roundTitle = document.getElementById('roundTitle');
+                const parallelRoundTitle = document.getElementById('parallelRoundTitle');
+                
+                // Update main round title
+                let titleText = 'Current Round';
+                let titleClass = 'round-title';
+                let indicators = [];
+                
+                if (this.hasFlipSeven) {
+                    titleClass = 'round-title flip-seven';
+                    indicators.push('<span class="flip-seven-indicator">🎉 FLIP 7!</span>');
+                } else if (this.isFrozen && this.isBusted) {
+                    titleClass = 'round-title frozen-busted';
+                    indicators.push('<span class="combined-indicator">❄️💥 FROZEN & BUST</span>');
+                } else if (this.isFrozen) {
+                    titleClass = 'round-title frozen';
+                    indicators.push('<span class="freeze-indicator">❄️ FROZEN</span>');
+                } else if (this.isBusted) {
+                    titleClass = 'round-title busted';
+                    indicators.push('<span class="bust-indicator">💥 BUST</span>');
+                }
+                
+                // Add active round indicator if parallel is active
+                if (this.isParallelActive) {
+                    if (this.activeRound === 'main') {
+                        indicators.push('<span style="background: #4CAF50; padding: 3px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px;">ACTIVE</span>');
+                    } else {
+                        indicators.push('<span style="background: #666; padding: 3px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px;">COMPLETE</span>');
+                    }
+                }
+                
+                roundTitle.className = titleClass;
+                roundTitle.innerHTML = titleText + indicators.join('');
+                
+                // Update parallel round title if active
+                if (this.isParallelActive && parallelRoundTitle) {
+                    let parallelTitleText = 'Parallel Round (X2)';
+                    let parallelTitleClass = 'round-title';
+                    let parallelIndicators = [];
+                    
+                    if (this.parallelHasFlipSeven) {
+                        parallelTitleClass = 'round-title flip-seven';
+                        parallelIndicators.push('<span class="flip-seven-indicator">🎉 FLIP 7!</span>');
+                    } else if (this.parallelIsFrozen && this.parallelIsBusted) {
+                        parallelTitleClass = 'round-title frozen-busted';
+                        parallelIndicators.push('<span class="combined-indicator">❄️💥 FROZEN & BUST</span>');
+                    } else if (this.parallelIsFrozen) {
+                        parallelTitleClass = 'round-title frozen';
+                        parallelIndicators.push('<span class="freeze-indicator">❄️ FROZEN</span>');
+                    } else if (this.parallelIsBusted) {
+                        parallelTitleClass = 'round-title busted';
+                        parallelIndicators.push('<span class="bust-indicator">💥 BUST</span>');
+                    }
+                    
+                    // Add active round indicator
+                    if (this.activeRound === 'parallel') {
+                        parallelIndicators.push('<span style="background: #4CAF50; padding: 3px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px;">ACTIVE</span>');
+                    } else {
+                        parallelIndicators.push('<span style="background: #666; padding: 3px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px;">WAITING</span>');
+                    }
+                    
+                    parallelRoundTitle.className = parallelTitleClass;
+                    parallelRoundTitle.innerHTML = parallelTitleText + parallelIndicators.join('');
+                }
+                
+                // Update round areas to show active/inactive state
+                const currentRoundArea = document.getElementById('currentRoundArea');
+                
+                if (this.isParallelActive) {
+                    if (this.activeRound === 'main') {
+                        currentRoundArea.classList.remove('round-inactive');
+                        parallelRoundArea.classList.add('round-inactive');
+                    } else {
+                        currentRoundArea.classList.add('round-inactive');
+                        parallelRoundArea.classList.remove('round-inactive');
+                    }
+                } else {
+                    currentRoundArea.classList.remove('round-inactive');
+                    parallelRoundArea.classList.remove('round-inactive');
+                }
+
+                // Update round ordering and collapse states
+                this.updateRoundOrdering();
+                this.updateRoundCollapseState();
+
+                // Update button states - disable if flip three is active, frozen, busted, or at card limit
+                const flipThreeActive = this.isFlipThreeActive;
+                const hasAvailableCards = this.deck.length > 0 || this.drawnCards.length > 0;
+                const activeRoundData = this.getActiveRoundData();
+                const cannotDraw = flipThreeActive || activeRoundData.isFrozen || activeRoundData.isBusted || activeRoundData.round.length >= 7 || !hasAvailableCards;
+                
+                document.getElementById('drawCard').disabled = cannotDraw;
+                
+                // End round button - check if active round has cards
+                const canEndRound = !flipThreeActive && activeRoundData.round.length > 0;
+                document.getElementById('endRound').disabled = !canEndRound;
+                
+                document.getElementById('undoAction').disabled = flipThreeActive || this.history.length === 0;
+                document.getElementById('shuffleRemaining').disabled = flipThreeActive;
+                document.getElementById('shuffleAll').disabled = flipThreeActive;
+            }
+
+            showDrawnCards() {
+                const overlay = document.getElementById('drawnOverlay');
+                const fannedCards = document.getElementById('fannedCards');
+                
+                fannedCards.innerHTML = '';
+                this.drawnCards.forEach(card => {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'fanned-card';
+                    
+                    const img = document.createElement('img');
+                    img.src = this.getCardImageSrc(card);
+                    img.alt = this.getCardDisplayName(card);
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'contain';
+                    img.style.borderRadius = '6px';
+                    
+                    // Fallback if image doesn't load
+                    img.onerror = () => {
+                        cardDiv.innerHTML = this.getCardDisplayName(card);
+                        cardDiv.style.fontSize = '14px';
+                        cardDiv.style.fontWeight = 'bold';
+                        cardDiv.style.color = '#333';
+                    };
+                    
+                    cardDiv.appendChild(img);
+                    fannedCards.appendChild(cardDiv);
+                });
+
+                overlay.style.display = 'flex';
+            }
+
+            exportGameState() {
+                const gameState = {
+                    deck: this.deck,
+                    drawnCards: this.drawnCards,
+                    currentRound: this.currentRound,
+                    powerCards: this.powerCards,
+                    history: this.history,
+                    isFrozen: this.isFrozen,
+                    isBusted: this.isBusted,
+                    isParallelActive: this.isParallelActive,
+                    parallelRound: this.parallelRound,
+                    parallelIsFrozen: this.parallelIsFrozen,
+                    parallelIsBusted: this.parallelIsBusted,
+                    parallelHasFlipSeven: this.parallelHasFlipSeven,
+                    activeRound: this.activeRound,
+                    usedX2Card: this.usedX2Card
+                };
+                
+                const gameStateText = document.getElementById('gameStateText');
+                gameStateText.value = JSON.stringify(gameState, null, 2);
+                gameStateText.classList.remove('hidden');
+                gameStateText.select();
+                document.execCommand('copy');
+                alert('Game state exported and copied to clipboard!');
+            }
+
+            importGameState(gameStateJson) {
+                try {
+                    const gameState = JSON.parse(gameStateJson);
+                    
+                    // Validate the game state structure
+                    if (!gameState.deck || !gameState.drawnCards || !gameState.currentRound) {
+                        throw new Error('Invalid game state format');
+                    }
+                    
+                    this.deck = gameState.deck;
+                    this.drawnCards = gameState.drawnCards;
+                    this.currentRound = gameState.currentRound;
+                    this.powerCards = gameState.powerCards || gameState.secondChanceCards || [];
+                    this.history = gameState.history || [];
+                    this.isFrozen = gameState.isFrozen || false;
+                    this.isBusted = gameState.isBusted || false;
+                    
+                    // Import parallel round state
+                    this.isParallelActive = gameState.isParallelActive || false;
+                    this.parallelRound = gameState.parallelRound || [];
+                    this.parallelIsFrozen = gameState.parallelIsFrozen || false;
+                    this.parallelIsBusted = gameState.parallelIsBusted || false;
+                    this.parallelHasFlipSeven = gameState.parallelHasFlipSeven || false;
+                    this.activeRound = gameState.activeRound || 'main';
+                    this.usedX2Card = gameState.usedX2Card || null;
+                    
+                    this.updateDisplay();
+                    alert('Game state imported successfully!');
+                } catch (error) {
+                    alert('Error importing game state: ' + error.message);
+                }
+            }
+
+            initializeEventListeners() {
+                document.getElementById('drawCard').addEventListener('click', () => {
+                    this.drawCard();
+                });
+
+                document.getElementById('endRound').addEventListener('click', () => {
+                    this.endRound();
+                });
+
+                document.getElementById('undoAction').addEventListener('click', () => {
+                    this.undoAction();
+                });
+
+                document.getElementById('shuffleRemaining').addEventListener('click', () => {
+                    this.shuffleRemainingCards();
+                });
+
+                document.getElementById('shuffleAll').addEventListener('click', () => {
+                    if (confirm('This will shuffle all cards back into the deck. Are you sure?')) {
+                        this.shuffleAllCards();
+                    }
+                });
+
+                document.getElementById('drawnPile').addEventListener('click', () => {
+                    if (this.drawnCards.length > 0) {
+                        this.showDrawnCards();
+                    }
+                });
+
+                document.getElementById('closeDrawn').addEventListener('click', () => {
+                    document.getElementById('drawnOverlay').style.display = 'none';
+                });
+
+                document.getElementById('drawnOverlay').addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('drawnOverlay')) {
+                        document.getElementById('drawnOverlay').style.display = 'none';
+                    }
+                });
+
+                document.getElementById('exportGame').addEventListener('click', () => {
+                    this.exportGameState();
+                });
+
+                document.getElementById('importGame').addEventListener('click', () => {
+                    const gameStateText = document.getElementById('gameStateText');
+                    const confirmBtn = document.getElementById('confirmImport');
+                    const cancelBtn = document.getElementById('cancelImport');
+                    
+                    gameStateText.classList.remove('hidden');
+                    confirmBtn.classList.remove('hidden');
+                    cancelBtn.classList.remove('hidden');
+                    gameStateText.focus();
+                });
+
+                document.getElementById('confirmImport').addEventListener('click', () => {
+                    const gameStateText = document.getElementById('gameStateText');
+                    this.importGameState(gameStateText.value);
+                    
+                    gameStateText.classList.add('hidden');
+                    document.getElementById('confirmImport').classList.add('hidden');
+                    document.getElementById('cancelImport').classList.add('hidden');
+                    gameStateText.value = '';
+                });
+
+                document.getElementById('cancelImport').addEventListener('click', () => {
+                    const gameStateText = document.getElementById('gameStateText');
+                    gameStateText.classList.add('hidden');
+                    document.getElementById('confirmImport').classList.add('hidden');
+                    document.getElementById('cancelImport').classList.add('hidden');
+                    gameStateText.value = '';
+                });
+
+                // Flip Three modal event listeners
+                document.getElementById('confirmFlipThree').addEventListener('click', () => {
+                    this.confirmFlipThreeSelection();
+                });
+
+                document.getElementById('cancelFlipThree').addEventListener('click', () => {
+                    this.cancelFlipThreeSelection();
+                });
+
+                // Close flip three modal when clicking overlay
+                document.getElementById('flipThreeOverlay').addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('flipThreeOverlay')) {
+                        this.cancelFlipThreeSelection();
+                    }
+                });
+
+                // Flip Seven modal event listeners
+                document.getElementById('closeFlipSeven').addEventListener('click', () => {
+                    document.getElementById('flipSevenOverlay').style.display = 'none';
+                });
+
+                // Close flip seven modal when clicking overlay
+                document.getElementById('flipSevenOverlay').addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('flipSevenOverlay')) {
+                        document.getElementById('flipSevenOverlay').style.display = 'none';
+                    }
+                });
+
+                // Round collapse toggle event listeners
+                document.getElementById('currentRoundToggle').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleCurrentRoundCollapse();
+                });
+
+                document.getElementById('parallelRoundToggle').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.toggleParallelRoundCollapse();
+                });
+
+                // Round header click to toggle collapse
+                document.getElementById('currentRoundHeader').addEventListener('click', () => {
+                    this.toggleCurrentRoundCollapse();
+                });
+
+                document.getElementById('parallelRoundHeader').addEventListener('click', () => {
+                    this.toggleParallelRoundCollapse();
+                });
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            window.cardDeckApp = new CardDeckApp();
+        });
+    </script>
+</body>
+</html>
