@@ -1,0 +1,382 @@
+{
+ "title": "Human Story",
+ "start": "h001",
+ "intro": "fade",
+ "show_affinity": false,
+ "characters": {
+  "n": "",
+  "z": "Zeke",
+  "e": "Endigo"
+ },
+ "vars": {
+  "misses": 0
+ },
+ "nodes": {
+  "h001": {
+   "who": "z",
+   "emo": "worried",
+   "scene": "forest",
+   "cap": "You are walking in the forest with your best friend. You are looking for a known treasure, said to give the power of the forest to the one who holds it. All of a sudden, an eerie silence fills the area.",
+   "text": "Hey, something’s up. [whisper|I don’t hear the birds anymore…]",
+   "choices": [
+    {
+     "t": "“Strange, let’s bounce.” (Head back)",
+     "say": "Strange, let’s bounce.",
+     "to": "h002"
+    },
+    {
+     "t": "“Yeah, let’s figure out what’s going on.” (Proceed forward)",
+     "say": "Yeah, let’s figure out what’s going on.",
+     "to": "h003"
+    }
+   ]
+  },
+  "h002": {
+   "who": "n",
+   "emo": "thoughtful",
+   "scene": "forest",
+   "text": "Zeke shakes his head and proceeds forward.",
+   "choices": [
+    {
+     "t": "Follow",
+     "to": "h004"
+    },
+    {
+     "t": "Ditch Zeke",
+     "to": "h005"
+    }
+   ]
+  },
+  "h003": {
+   "who": "n",
+   "emo": "worried",
+   "scene": "clearing",
+   "text": "You walk ahead of Zeke, checking out the clearing in front of you. The silence is unsettling; you know there should be the sound of [cold|weather or wildlife.]",
+   "choices": [
+    {
+     "t": "Proceed",
+     "to": "h004"
+    }
+   ]
+  },
+  "h004": {
+   "who": "z",
+   "emo": "incredulous",
+   "scene": "clearing",
+   "cap": "Out of the forest in the distance, a figure is running towards you. You can’t tell if it is one of your kind.",
+   "text": "Hey man, is that an [glow|Endigo?]",
+   "choices": [
+    {
+     "t": "Move closer to see",
+     "to": "h006"
+    },
+    {
+     "t": "Call out to the Endigo",
+     "to": "h007"
+    }
+   ]
+  },
+  "h005": {
+   "who": "n",
+   "emo": "sad",
+   "scene": "home",
+   "text": "You trek back home, leaving Zeke to investigate alone.",
+   "choices": [
+    {
+     "t": "Alert your boss about Zeke’s whereabouts",
+     "to": "h008"
+    },
+    {
+     "t": "Go about your day",
+     "to": "h009"
+    }
+   ]
+  },
+  "h006": {
+   "who": "n",
+   "emo": "worried",
+   "scene": "clearing",
+   "text": "You get closer to the Endigo, stepping fully into the clearing. [shout|A scream erupts from the Endigo,] like an elk bugle from hell. It gestures toward your side of the forest with frantic arms. You get the impression it is [big|NOT] happy you are here.",
+   "choices": [
+    {
+     "t": "Ready your weapon",
+     "to": "h010"
+    },
+    {
+     "t": "Re-enter your side of the forest",
+     "to": "h011"
+    }
+   ]
+  },
+  "h007": {
+   "who": "n",
+   "emo": "thoughtful",
+   "scene": "clearing",
+   "text": "You call out to the Endigo. [whisper|It does not respond.]",
+   "choices": [
+    {
+     "t": "Step into the clearing, drawing your weapon",
+     "to": "h010"
+    },
+    {
+     "t": "Stay put, watching what the figure does",
+     "to": "h011"
+    }
+   ]
+  },
+  "h008": {
+   "who": "n",
+   "emo": "sad",
+   "scene": "home",
+   "text": "Your boss asks why you left Zeke alone.",
+   "choices": [
+    {
+     "t": "Continue",
+     "to": "h009"
+    }
+   ]
+  },
+  "h009": {
+   "who": "n",
+   "emo": "sad",
+   "scene": "night",
+   "text": "Nightfall comes. [sad|No sign of Zeke.]",
+   "choices": [
+    {
+     "t": "Look for him",
+     "to": "h013"
+    },
+    {
+     "t": "Go to bed",
+     "to": "h014"
+    }
+   ]
+  },
+  "h010": {
+   "who": "n",
+   "emo": "worried",
+   "scene": "beast",
+   "text": "A large beast [shout|explodes out of the trees,] looking at the figure. A wave of energy erupts from the beast, knocking the Endigo well into the air. [big|Its eyes lock onto you.]",
+   "choices": [
+    {
+     "t": "Fire at the beast",
+     "to": "h012"
+    },
+    {
+     "t": "Observe the beast",
+     "to": "h013"
+    }
+   ]
+  },
+  "h011": {
+   "who": "e",
+   "emo": "incredulous",
+   "scene": "clearing",
+   "cap": "Across the clearing, a large beast runs perpendicular to the figure. It does not enter the clearing; it seems the beast lost its prey. The Endigo approaches.",
+   "text": "What are you doing here? [big|Get away from here.]",
+   "choices": [
+    {
+     "t": "“Looking for the forest treasure.”",
+     "say": "Looking for the forest treasure.",
+     "to": "h015"
+    },
+    {
+     "t": "“We have gotten lost, can you help us?”",
+     "say": "We have gotten lost, can you help us?",
+     "to": "h016"
+    }
+   ]
+  },
+  "h012": {
+   "who": "n",
+   "emo": "worried",
+   "scene": "beast",
+   "text": "You aim your bow. [shout|The beast begins to charge you.]",
+   "choices": [
+    {
+     "t": "Shoot the head",
+     "to": "h022",
+     "fx": {
+      "add": {
+       "misses": 1
+      }
+     }
+    },
+    {
+     "t": "Shoot the chest",
+     "to": "h022",
+     "fx": {
+      "add": {
+       "misses": 1
+      }
+     }
+    },
+    {
+     "t": "Shoot the right leg",
+     "to": "h022",
+     "fx": {
+      "add": {
+       "misses": 1
+      }
+     }
+    },
+    {
+     "t": "Shoot the left leg",
+     "to": "h021"
+    }
+   ]
+  },
+  "h013": {
+   "who": "n",
+   "emo": "worried",
+   "scene": "beast",
+   "text": "The beast charges at you. You do notice its front left leg [cold|has a wound already.]",
+   "choices": [
+    {
+     "t": "Dodge",
+     "to": "h020"
+    },
+    {
+     "t": "Fire at the wound",
+     "to": "h021"
+    }
+   ]
+  },
+  "h014": {
+   "who": "n",
+   "emo": "sad",
+   "scene": "night",
+   "text": "You ditched Zeke. [sad|You lose.]",
+   "end": "lose"
+  },
+  "h015": {
+   "who": "e",
+   "emo": "thoughtful",
+   "scene": "clearing",
+   "text": "That treasure is [cold|not for you.] Do not continue your search. Entering this clearing is [big|certain death.] Those not of the forest spirit’s lineage will not be able to hold the treasure. Leave now.",
+   "choices": [
+    {
+     "t": "Leave",
+     "to": "h017"
+    },
+    {
+     "t": "“No, we need this treasure. We will proceed.” (Enter the clearing)",
+     "say": "No, we need this treasure. We will proceed.",
+     "to": "h010"
+    }
+   ]
+  },
+  "h016": {
+   "who": "e",
+   "emo": "thoughtful",
+   "scene": "clearing",
+   "cap": "The Endigo points the way you came.",
+   "text": "Go that direction until you hit your people’s village. Do not enter this clearing. The forest will not be forgiving to your kind without a chaperone, and [cold|I do not have the time.]",
+   "choices": [
+    {
+     "t": "Enter the clearing",
+     "to": "h010"
+    },
+    {
+     "t": "Go home",
+     "to": "h017"
+    }
+   ]
+  },
+  "h017": {
+   "who": "n",
+   "emo": "sad",
+   "scene": "home",
+   "text": "You arrive home. The end. [sad|You lose.]",
+   "end": "lose"
+  },
+  "h020": {
+   "who": "e",
+   "emo": "worried",
+   "scene": "beast",
+   "cap": "The beast misses you by a hair, but makes contact with Zeke. As it rips your friend to shreds, the Endigo comes running over.",
+   "text": "[shout|GO HOME NOW.] [shout|THERE IS NO SAVING YOUR FRIEND.]",
+   "choices": [
+    {
+     "t": "Go home",
+     "to": "h017"
+    }
+   ]
+  },
+  "h021": {
+   "who": "n",
+   "emo": "awe",
+   "scene": "beast",
+   "text": "The monster stumbles and slides to a halt in front of you. It struggles to get up several times. The Endigo approaches the beast with an [cold|eerie calm,] sliding a knife into its neck. [whisper|The beast goes still.]",
+   "end": "win",
+   "end_title": "To be continued…"
+  },
+  "h022": {
+   "who": "n",
+   "emo": "worried",
+   "scene": "beast",
+   "redirect": [
+    {
+     "when": {
+      "min": {
+       "misses": 2
+      }
+     },
+     "to": "h023"
+    }
+   ],
+   "text": "The shot glances off the beast [cold|like nothing.] It continues to charge you.",
+   "choices": [
+    {
+     "t": "Shoot the head",
+     "to": "h022",
+     "fx": {
+      "add": {
+       "misses": 1
+      }
+     }
+    },
+    {
+     "t": "Shoot the right leg",
+     "to": "h022",
+     "fx": {
+      "add": {
+       "misses": 1
+      }
+     }
+    },
+    {
+     "t": "Shoot the left leg",
+     "to": "h021"
+    },
+    {
+     "t": "Shoot the chest",
+     "to": "h022",
+     "fx": {
+      "add": {
+       "misses": 1
+      }
+     }
+    },
+    {
+     "t": "Dodge",
+     "to": "h020"
+    }
+   ]
+  },
+  "h023": {
+   "who": "n",
+   "emo": "worried",
+   "scene": "beast",
+   "text": "[shout|The beast devours you.]",
+   "end": "death"
+  }
+ },
+ "places": {
+  "forest": "The Eternal Forest",
+  "clearing": "The Clearing",
+  "beast": "The Clearing",
+  "home": "Your Village",
+  "night": "Your Village · Nightfall"
+ }
+}

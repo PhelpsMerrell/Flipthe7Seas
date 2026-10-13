@@ -1,14 +1,27 @@
 // Resonant Impact — demo engine. One engine, two looks.
 // The theme switch only toggles a class on <html> ("theme-fantasy" / "theme-console").
 // Console (or reduced motion) also makes text appear instantly.
-// All dialogue lives in story.json (shared with the Godot build).
-const STORY = await (await fetch('./story.json')).json();
-const { nodes: NODES, races: RACES, stat_names: STAT_NAMES } = STORY;
+// Stories are data: stories/manifest.json maps races to story files (shared with the Godot build).
+const MANIFEST = await (await fetch('./stories/manifest.json')).json();
+const { races: RACES, stat_names: STAT_NAMES } = MANIFEST;
+const STORY_CACHE = {};
+let STORY = null;   // the story being played
+let NODES = {};
+async function loadStoryFor(raceId) {
+  const key = (MANIFEST.story_by_race || {})[raceId] || MANIFEST.default_story;
+  if (!STORY_CACHE[key]) STORY_CACHE[key] = await (await fetch('./stories/' + MANIFEST.stories[key].file)).json();
+  STORY = STORY_CACHE[key];
+  NODES = STORY.nodes;
+}
 
 const ROMAN = ['I', 'II', 'III', 'IV', 'V'];
 const BASE = { worried: 1, happy: 1.15, laugh: 1.3, incredulous: 1.15, sad: 0.6, thoughtful: 0.8, awe: 0.8 };
 const TAGF = { shout: 1.7, big: 0.85, whisper: 0.5, cold: 0.65, hot: 1.1, glow: 0.7, fall: 0.8, sad: 0.55, laugh: 1.3, warm: 0.85, forest: 0.75 };
-const PLACE = { forest: 'The Eternal Forest', elf: 'Beside the Holy Trove', pit: 'The Holy Trove', path: 'The Perimeter Path' };
+const PLACE = { forest: 'The Eternal Forest', elf: 'Beside the Holy Trove', pit: 'The Holy Trove', path: 'The Perimeter Path',
+  clearing: 'The Clearing', beast: 'The Clearing', home: 'Home', night: 'Nightfall' };
+const MOODS = ['forest', 'elf', 'pit', 'path', 'clearing', 'beast', 'home', 'night'];
+const MONO_COLORS = 4;   // .mono.c0 … .c3 in style.css
+const ENDING = { win: 'The End', lose: 'The End · You lose', death: 'Game Over' };
 
 const html = document.documentElement;
 const screen = document.getElementById('screen');
@@ -16,7 +29,7 @@ const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => Array.from(el.querySelectorAll(s));
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-const S = { phase: 'studio', node: 'd1', name: '', race: null, focus: 'human', aff: 0, asked: {}, theme: readTheme(), reduce: readReduce() };
+const S = { phase: 'studio', node: null, name: '', race: null, focus: 'human', aff: 0, asked: {}, vars: {}, theme: readTheme(), reduce: readReduce() };
 let timers = [];
 let finishLine = null;
 let typing = false;
@@ -70,7 +83,7 @@ $('#restartBtn').addEventListener('click', () => restart());
     el.append(f);
   }
 })();
-function setScene(s) { html.dataset.scene = s; }
+function setScene(s) { html.dataset.scene = MOODS.includes(s) ? s : 'forest'; }
 function toast(text) {
   const t = $('#toast');
   t.textContent = '✦ ' + text;
@@ -149,11 +162,19 @@ function race() {
   $('#beginBtn').onclick = wake;
 }
 
-function wake() {
+async function wake() {
   S.race = S.focus;
-  phase('wake'); setScene('elf');
+  $('#beginBtn').disabled = true;
+  await loadStoryFor(S.race);
+  resetStoryState();
+  const fade = STORY.intro !== 'wake';
+  phase(fade ? 'fadein' : 'wake'); setScene((NODES[STORY.start] || {}).scene || 'forest');
   screen.innerHTML = '';
-  later(talkStart, instant() ? 0 : 3000);
+  later(talkStart, instant() ? 0 : fade ? 1800 : 3000);
+}
+function resetStoryState() {
+  S.vars = JSON.parse(JSON.stringify(STORY.vars || {}));
+  S.aff = 0; S.asked = {}; S.name = '';
 }
 
 /* ---------- talk ---------- */
@@ -161,7 +182,7 @@ function talkStart() {
   phase('talk');
   screen.innerHTML = `<section class="talk"><div class="loc" id="loc"></div><div class="log" id="log"></div><div class="opts" id="opts"></div></section>`;
   $('#log').addEventListener('click', () => { if (finishLine) finishLine(); });
-  go('d1');
+  go(STORY.start);
 }
 
 function addLog(kind, content, asHtml) {
@@ -174,23 +195,52 @@ function addLog(kind, content, asHtml) {
 }
 function scrollEnd() { const l = $('#log'); if (l) l.scrollTop = l.scrollHeight; }
 
+/* ---------- story logic: vars, requirements, effects ---------- */
+function meets(req) {
+  if (!req) return true;
+  const v = (k) => S.vars[k] ?? 0;
+  for (const [k, n] of Object.entries(req.min || {})) if (v(k) < n) return false;
+  for (const [k, n] of Object.entries(req.max || {})) if (v(k) > n) return false;
+  for (const [k, n] of Object.entries(req.eq || {})) if ((S.vars[k] ?? null) !== n) return false;
+  return true;
+}
+function applyFx(fx) {
+  if (!fx) return;
+  for (const [k, n] of Object.entries(fx.add || {})) S.vars[k] = (S.vars[k] ?? 0) + n;
+  for (const [k, n] of Object.entries(fx.set || {})) S.vars[k] = n;
+}
+const visibleChoices = (n) => (n.choices || []).filter((c) => meets(c.req));
+
 function go(id) {
+  let n = NODES[id];
+  for (let hop = 0; n && n.redirect && hop < 8; hop++) {
+    const r = n.redirect.find((x) => meets(x.when));
+    if (!r) break;
+    id = r.to; n = NODES[id];
+  }
+  if (!n) { console.error('Missing story node', id); return; }
   S.node = id;
-  const n = NODES[id];
   setScene(n.scene);
-  $('#loc').textContent = PLACE[n.scene];
-  if (n.cap) addLog('cap', n.cap);
+  $('#loc').textContent = (STORY.places || {})[n.scene] || PLACE[n.scene] || '';
+  if (n.cap) addLog('cap', fill(n.cap));
   showLine(n);
 }
+const fill = (s) => s.replace(/\{name\}/g, S.name || 'friend');
 
+// Display name for a line: characters[who]; '' = narration. `reveal` swaps in a name once typed.
 function speaker(n, revealedTo, p) {
-  if (n.who === 'a') return 'Ancel';
-  if (n.reveal && revealedTo > p.plain.indexOf(n.reveal)) return 'Ancel';
-  return 'Unknown';
+  const chars = STORY.characters || {};
+  if (n.reveal && revealedTo > p.plain.indexOf(n.reveal)) return n.reveal;
+  return chars[n.who] ?? n.who ?? '';
+}
+function monoColor(name) {
+  const named = Object.values(STORY.characters || {}).filter((v) => v);
+  const i = named.indexOf(name);
+  return 'c' + ((i < 0 ? 0 : i) % MONO_COLORS);
 }
 
 function showLine(n) {
-  const p = parse(n.text);
+  const p = parse(n.text);  // parse() fills {name}
   const block = document.createElement('div');
   block.className = 'line now';
   block.innerHTML = `<span class="mono" aria-hidden="true"></span><span class="who"></span><p class="say em-${n.emo}"></p>`;
@@ -202,14 +252,17 @@ function showLine(n) {
     say.append(el);
     return { ...w, el, shown: 0 };
   });
-  let current = '';
+  let current = null;
   const setWho = (to) => {
     const name = speaker(n, to, p);
     if (name === current) return;
+    const wasSet = current !== null;
     current = name;
-    who.textContent = name; mono.textContent = name === 'Ancel' ? 'A' : '?';
-    block.classList.toggle('ancel', name === 'Ancel');
-    if (name === 'Ancel' && n.reveal) { who.classList.add('named'); mono.classList.add('named'); }
+    block.classList.toggle('narr', !name);
+    who.textContent = name;
+    mono.textContent = !name ? '' : /^unknown$/i.test(name) ? '?' : name[0].toUpperCase();
+    mono.className = 'mono ' + monoColor(name);
+    if (wasSet && name) { who.classList.add('named'); mono.classList.add('named'); }
   };
   const revealTo = (target) => {
     for (const w of words) {
@@ -232,7 +285,7 @@ function showLine(n) {
     done = true; typing = false; finishLine = null;
     revealTo(p.len + 1);
     block.classList.remove('typing');
-    showChoices(n);
+    if (n.end) ending(n); else showChoices(n);
   };
   setWho(0);
   if (instant()) { finish(); return; }
@@ -259,8 +312,9 @@ function showLine(n) {
 
 function showChoices(n) {
   const opts = $('#opts');
-  opts.classList.toggle('many', n.choices.length > 3);
-  opts.innerHTML = n.choices.map((c, i) =>
+  const list = visibleChoices(n);
+  opts.classList.toggle('many', list.length > 3);
+  opts.innerHTML = list.map((c, i) =>
     `<button class="plaque${c.death ? ' death' : ''}" data-i="${i}" style="animation-delay:${80 + i * 90}ms"><span class="num" aria-hidden="true">${ROMAN[i]}</span><span class="ct">${esc(c.t)}</span>${c.death ? '<span class="tag">Certain Death</span>' : ''}${c.q && S.asked[c.q] ? '<span class="tag">asked</span>' : ''}</button>`).join('');
   $$('.plaque', opts).forEach((b) => b.onclick = () => choose(+b.dataset.i));
 }
@@ -271,26 +325,29 @@ function settleLine(said) {
 }
 
 function choose(i) {
-  const n = NODES[S.node], c = n.choices[i];
-  if (c.input) return askName();
+  const n = NODES[S.node], c = visibleChoices(n)[i];
+  if (!c) return;
+  if (c.input) return askName(c);
   const opts = $('#opts');
   $$('.plaque', opts).forEach((b, k) => { b.disabled = true; b.classList.add(k === i ? 'picked' : 'dim'); });
   later(() => {
     opts.innerHTML = '';
-    settleLine(c.say || c.t);
+    settleLine(fill(c.say || c.t));
+    applyFx(c.fx);
     if (c.aff) {
       S.aff += c.aff;
-      const label = S.name ? '+1 Ancel Affinity' : '+1 Affinity';
-      if (isConsole()) addLog('note', `(${label})`); else toast(label);
+      if (STORY.show_affinity) {
+        const who = STORY.affinity_name;
+        const label = `+${c.aff} ` + (S.name && who ? `${who} Affinity` : 'Affinity');
+        if (isConsole()) addLog('note', `(${label})`); else toast(label);
+      }
     }
     if (c.q) S.asked[c.q] = true;
-    if (c.to === 'OVER') return over();
-    if (c.to === 'END') return end();
     go(c.to);
   }, instant() ? 0 : 450);
 }
 
-function askName() {
+function askName(c) {
   const opts = $('#opts');
   opts.classList.remove('many');
   opts.innerHTML = `<form class="namebox" id="nameForm" autocomplete="off">
@@ -303,33 +360,44 @@ function askName() {
     e.preventDefault();
     S.name = input.value.trim().slice(0, 18) || 'Wren';
     opts.innerHTML = '';
-    settleLine(`I’m ${S.name}.`);
-    go('d5');
+    settleLine(c.say ? fill(c.say) : `I’m ${S.name}.`);
+    go(c.to);
   });
 }
 
-function over() {
-  addLog('block', `<p class="go">Game Over</p><p class="cd">Certain Death</p><p class="cdx">Some choices echo louder than others.</p>`, true).classList.add('over');
-  const opts = $('#opts');
-  opts.classList.remove('many');
-  opts.innerHTML = `<button class="plaque center" id="rewindBtn">Rewind the moment</button><button class="plaque center" id="titleBtn">Return to title</button>`;
-  $('#rewindBtn').onclick = () => { opts.innerHTML = ''; go('d6'); };
-  $('#titleBtn').onclick = restart;
-}
-
-function end() {
+// End nodes: the line plays, then this card. Try again = node.rewind (vars kept) or the start (fresh).
+function ending(n) {
+  const kind = n.end in ENDING ? n.end : 'win';
   const race = RACES.find((r) => r.id === S.race);
-  const rows = [['Name', S.name || '—'], ['Race', race ? race.name : '—'], ['Ancel affinity', '+' + S.aff], ['Questions asked', Object.keys(S.asked).length + ' of 4']];
-  addLog('block', `<h2>End of demo</h2><dl>${rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`, true).classList.add('endcard');
+  const rows = [];
+  if (S.name) rows.push(['Name', S.name]);
+  rows.push(['Race', race ? race.name : '—'], ['Story', STORY.title || '—'], ['Ending', { win: 'Victory', lose: 'Defeat', death: 'Death' }[kind]]);
+  if (STORY.show_affinity) {
+    rows.push([(STORY.affinity_name ? STORY.affinity_name + ' affinity' : 'Affinity'), '+' + S.aff]);
+    const qs = new Set(); Object.values(NODES).forEach((x) => (x.choices || []).forEach((c) => c.q && qs.add(c.q)));
+    if (qs.size) rows.push(['Questions asked', Object.keys(S.asked).length + ' of ' + qs.size]);
+  }
+  const head = kind === 'death'
+    ? `<p class="go">Game Over</p>${n.end_title ? `<p class="cd">${esc(n.end_title)}</p>` : ''}`
+    : `<h2>${esc(n.end_title || ENDING[kind])}</h2>`;
+  addLog('block', `${head}<dl>${rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`, true).classList.add('endcard', 'end-' + kind);
   const opts = $('#opts');
   opts.classList.remove('many');
-  opts.innerHTML = `<button class="plaque center" id="againBtn">Play again</button>`;
-  $('#againBtn').onclick = restart;
+  const again = n.rewind ? 'Rewind the moment' : kind === 'win' ? 'Play again' : 'Try again';
+  opts.innerHTML = `<button class="plaque center" id="againBtn">${again}</button><button class="plaque center" id="titleBtn">Return to title</button>`;
+  $('#againBtn').onclick = () => {
+    opts.innerHTML = '';
+    if (n.rewind) { settleLine(); return go(n.rewind); }
+    resetStoryState();
+    $('#log').innerHTML = '';
+    go(STORY.start);
+  };
+  $('#titleBtn').onclick = restart;
 }
 
 function restart() {
   clearTimers(); finishLine = null; typing = false;
-  Object.assign(S, { node: 'd1', name: '', race: null, focus: 'human', aff: 0, asked: {} });
+  Object.assign(S, { node: null, name: '', race: null, focus: 'human', aff: 0, asked: {}, vars: {} });
   title();
 }
 

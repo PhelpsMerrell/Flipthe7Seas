@@ -1,0 +1,77 @@
+{
+ "_notes": [
+  "Story manifest. Each race can map to its own story file; anything unmapped plays default_story.",
+  "Story file: title, start (first node), intro ('wake' = eyelids opening, 'fade' = simple fade), characters (who-code -> display name; '' = narration), vars (starting values), places (scene -> location label, optional), show_affinity + affinity_name (optional), nodes.",
+  "Node: who, emo, scene, cap (narration shown above the line), text (inline tags [style|words]), reveal (name shown once the typewriter reaches it), choices, redirect, end, end_title, rewind.",
+  "Choice: t (button text), to (next node), say (what the log shows you said; defaults to t), aff, q, input (name entry), death (marks Certain Death), fx {add:{var:n}, set:{var:v}}, req {min:{var:n}, max:{var:n}, eq:{var:v}}.",
+  "redirect: [{when: <req>, to: node}] — checked on arrival; first match wins.",
+  "end: 'win' | 'lose' | 'death'. Shows the ending card. rewind = node 'Try again' returns to (default: start, vars reset).",
+  "Styles: big shout laugh whisper cold hot glow forest warm sad fall. Emotions: worried happy laugh incredulous sad thoughtful awe.",
+  "Scenes with built-in moods: forest elf pit path clearing beast home night (anything else falls back to forest)."
+ ],
+ "default_story": "ancel",
+ "story_by_race": {
+  "human": "human"
+ },
+ "stories": {
+  "ancel": {
+   "title": "Ancel",
+   "file": "ancel.json"
+  },
+  "human": {
+   "title": "Human Story",
+   "file": "human.json"
+  }
+ },
+ "races": [
+  {
+   "id": "human",
+   "name": "Human",
+   "where": "Holy Land · common",
+   "stats": [
+    1,
+    1,
+    1
+   ],
+   "desc": "The most common people of Anbur, who chiefly populate the holy land. Less accustomed to the Eternal Forest, but the most versatile of all."
+  },
+  {
+   "id": "elf",
+   "name": "Elf",
+   "where": "Holy Land · common",
+   "stats": [
+    0,
+    2,
+    1
+   ],
+   "desc": "Their vast knowledge has even led to a moderate understanding of divine power — at the expense of physical capability."
+  },
+  {
+   "id": "dwarf",
+   "name": "Dwarf",
+   "where": "Holy Land · common",
+   "stats": [
+    2,
+    1,
+    0
+   ],
+   "desc": "Their reduction in height has done nothing to reduce their physical prowess nor their moderate intelligence — but they see themselves as beyond the need for magic tricks."
+  },
+  {
+   "id": "endigo",
+   "name": "Endigo",
+   "where": "Eternal Forest · rare",
+   "stats": [
+    1,
+    0,
+    2
+   ],
+   "desc": "The tribalistic people of the Eternal Forest, who almost never venture toward the holy lands. A deft understanding of casting magics, but largely naive to the world at large."
+  }
+ ],
+ "stat_names": [
+  "Strength",
+  "Mental",
+  "Power"
+ ]
+}

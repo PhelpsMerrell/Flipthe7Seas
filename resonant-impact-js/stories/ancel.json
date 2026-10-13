@@ -1,0 +1,306 @@
+{
+ "title": "Ancel",
+ "start": "d1",
+ "intro": "wake",
+ "show_affinity": true,
+ "characters": {
+  "n": "",
+  "u": "Unknown",
+  "a": "Ancel"
+ },
+ "vars": {},
+ "nodes": {
+  "d1": {
+   "who": "u",
+   "emo": "worried",
+   "scene": "elf",
+   "cap": "Your eyes open. A kind elven mage leans over you, his hand outstretched.",
+   "text": "Hey! [big|Are you okay?] Let me help you up!",
+   "choices": [
+    {
+     "t": "Grab the elf’s hand.",
+     "to": "d2a",
+     "aff": 1,
+     "say": "You take his hand."
+    },
+    {
+     "t": "Swat the elf’s hand away and get up on your own.",
+     "to": "d2b",
+     "say": "You swat his hand away and stand."
+    }
+   ]
+  },
+  "d2a": {
+   "who": "u",
+   "emo": "happy",
+   "scene": "elf",
+   "text": "Hey, friend! Pretty bold to take a nap so close to the [glow|Holy Trove] like that! You’re lucky you didn’t [fall|fall in!]",
+   "choices": [
+    {
+     "t": "The Trove?",
+     "to": "d3"
+    }
+   ]
+  },
+  "d2b": {
+   "who": "u",
+   "emo": "laugh",
+   "scene": "elf",
+   "text": "[shout|WOAH!] [laugh|Ha!] Somebody woke up on the [glow|Trove] of the bed this morning!",
+   "choices": [
+    {
+     "t": "The Trove?",
+     "to": "d3"
+    }
+   ]
+  },
+  "d3": {
+   "who": "u",
+   "emo": "incredulous",
+   "scene": "pit",
+   "cap": "Past his shoulder, the forest floor falls away into a vast pit. It seems to have no bottom at all.",
+   "text": "Now you’re pulling my leg! You can’t live in the [glow|Radial Perimeter] without knowing about the [glow|Holy Trove!] It’s the only reason most of us are this far into the [forest|Eternal Forest!] [big|What else could you be doing here?]",
+   "choices": [
+    {
+     "t": "I don’t remember…",
+     "to": "d4"
+    }
+   ]
+  },
+  "d4": {
+   "who": "u",
+   "reveal": "Ancel",
+   "emo": "worried",
+   "scene": "elf",
+   "text": "[sad|No way…] You remember your name at least, right? [warm|I’m Ancel!]",
+   "choices": [
+    {
+     "t": "I’m [Enter Player Name].",
+     "input": true,
+     "to": "d5"
+    }
+   ]
+  },
+  "d5": {
+   "who": "a",
+   "emo": "happy",
+   "scene": "elf",
+   "text": "Pleased to meet you, [warm|{name}!] Do you know which [glow|Perimeter Town] you’re from? I could walk you back!",
+   "choices": [
+    {
+     "t": "Uh…",
+     "to": "d6"
+    }
+   ]
+  },
+  "d6": {
+   "who": "a",
+   "emo": "thoughtful",
+   "scene": "elf",
+   "text": "[sad|Another blank, huh?] Your nap is seeming less intentional by the minute… [happy|how ’bout this.] You can join me while I head back to town, and we’ll see if we can’t [warm|jog up some of those memories!]",
+   "choices": [
+    {
+     "t": "That sounds great! Thanks!",
+     "to": "hub",
+     "aff": 1
+    },
+    {
+     "t": "For a game about impactful choices, this is some serious railroading.",
+     "to": "rail_over",
+     "death": true
+    }
+   ]
+  },
+  "hub": {
+   "who": "a",
+   "emo": "happy",
+   "scene": "path",
+   "cap": "Ancel sets off along a winding path between the ancient trees. You follow.",
+   "text": "[shout|Awesome!] Follow me! Ask me [warm|anything] you like!",
+   "choices": [
+    {
+     "t": "What is the Trove?",
+     "to": "q1",
+     "q": "q1"
+    },
+    {
+     "t": "What is the Radial Perimeter?",
+     "to": "q2",
+     "q": "q2"
+    },
+    {
+     "t": "What is the Eternal Forest?",
+     "to": "q3",
+     "q": "q3"
+    },
+    {
+     "t": "What are the Perimeter Towns?",
+     "to": "q4",
+     "q": "q4"
+    },
+    {
+     "t": "That’s all the questions I had!",
+     "to": "bye"
+    }
+   ]
+  },
+  "q1": {
+   "who": "a",
+   "emo": "awe",
+   "scene": "pit",
+   "text": "The [glow|Holy Trove] is the pit you nearly rolled into! [whisper|Nobody’s ever found the bottom.] Every so often it gives something back up — and that’s what draws us all out here.",
+   "choices": [
+    {
+     "t": "What is the Trove?",
+     "to": "q1",
+     "q": "q1"
+    },
+    {
+     "t": "What is the Radial Perimeter?",
+     "to": "q2",
+     "q": "q2"
+    },
+    {
+     "t": "What is the Eternal Forest?",
+     "to": "q3",
+     "q": "q3"
+    },
+    {
+     "t": "What are the Perimeter Towns?",
+     "to": "q4",
+     "q": "q4"
+    },
+    {
+     "t": "That’s all the questions I had!",
+     "to": "bye"
+    }
+   ]
+  },
+  "q2": {
+   "who": "a",
+   "emo": "happy",
+   "scene": "path",
+   "text": "It’s the great ring of settlements around the Trove. Close enough to reach it in a day, far enough that the [cold|deep forest] mostly leaves us alone.",
+   "choices": [
+    {
+     "t": "What is the Trove?",
+     "to": "q1",
+     "q": "q1"
+    },
+    {
+     "t": "What is the Radial Perimeter?",
+     "to": "q2",
+     "q": "q2"
+    },
+    {
+     "t": "What is the Eternal Forest?",
+     "to": "q3",
+     "q": "q3"
+    },
+    {
+     "t": "What are the Perimeter Towns?",
+     "to": "q4",
+     "q": "q4"
+    },
+    {
+     "t": "That’s all the questions I had!",
+     "to": "bye"
+    }
+   ]
+  },
+  "q3": {
+   "who": "a",
+   "emo": "awe",
+   "scene": "path",
+   "text": "This! All of it! The [forest|Eternal Forest] goes on further than anyone’s ever mapped. [cold|The trees here don’t die.] [whisper|They just keep growing.]",
+   "choices": [
+    {
+     "t": "What is the Trove?",
+     "to": "q1",
+     "q": "q1"
+    },
+    {
+     "t": "What is the Radial Perimeter?",
+     "to": "q2",
+     "q": "q2"
+    },
+    {
+     "t": "What is the Eternal Forest?",
+     "to": "q3",
+     "q": "q3"
+    },
+    {
+     "t": "What are the Perimeter Towns?",
+     "to": "q4",
+     "q": "q4"
+    },
+    {
+     "t": "That’s all the questions I had!",
+     "to": "bye"
+    }
+   ]
+  },
+  "q4": {
+   "who": "a",
+   "emo": "happy",
+   "scene": "path",
+   "text": "Little towns strung along the Perimeter. Mine’s a short walk east — [hot|warm hearths], [laugh|terrible stew], and more Trove-seekers than beds.",
+   "choices": [
+    {
+     "t": "What is the Trove?",
+     "to": "q1",
+     "q": "q1"
+    },
+    {
+     "t": "What is the Radial Perimeter?",
+     "to": "q2",
+     "q": "q2"
+    },
+    {
+     "t": "What is the Eternal Forest?",
+     "to": "q3",
+     "q": "q3"
+    },
+    {
+     "t": "What are the Perimeter Towns?",
+     "to": "q4",
+     "q": "q4"
+    },
+    {
+     "t": "That’s all the questions I had!",
+     "to": "bye"
+    }
+   ]
+  },
+  "bye": {
+   "who": "a",
+   "emo": "happy",
+   "scene": "path",
+   "text": "Then let’s get moving, [warm|{name}!] Town’s this way — and [cold|stay close.]",
+   "choices": [
+    {
+     "t": "Follow Ancel",
+     "to": "fin"
+    }
+   ]
+  },
+  "rail_over": {
+   "who": "n",
+   "emo": "thoughtful",
+   "scene": "elf",
+   "text": "[cold|Certain death.] [whisper|Some choices echo louder than others.]",
+   "end": "death",
+   "rewind": "d6",
+   "end_title": "Certain Death"
+  },
+  "fin": {
+   "who": "n",
+   "emo": "happy",
+   "scene": "path",
+   "text": "You follow Ancel down the winding path toward town.",
+   "end": "win",
+   "end_title": "End of demo"
+  }
+ },
+ "affinity_name": "Ancel"
+}
